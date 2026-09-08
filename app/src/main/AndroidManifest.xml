@@ -2,44 +2,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Étape 1 : wipe core — Device Admin -->
     <uses-feature android:name="android.software.device_admin" android:required="false" />
 
-    <!-- Étape 2 (Garde-clefs) : AccessibilityService pour scruter le lockscreen -->
     <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
 
-    <!-- Étape 3 (USB Kill) : foreground service + redémarrage après reboot -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Étape 4 (SMS Wipe) : réception des SMS pour trigger wipe -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
-    <!-- Étape 5 (Voice Wipe) : foreground service micro + enregistrement -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- Biométrie optionnelle (Étape 7) : -->
-    <!-- <uses-permission android:name="android.permission.USE_BIOMETRIC" /> -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Wipe programmé : alarmes exactes requises pour des échéances longues -->
-    <!-- SCHEDULE_EXACT_ALARM : Android 12 (API 31) jusqu'à 13 (API 33) -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <!-- USE_EXACT_ALARM : Android 13+ (API 33) pour apps calendrier/alarme/réveil -->
+
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
-    <!--
-      Mode Decoy (Option A) : fausse page "Mise à jour système" lancée via
-      notification FullScreenIntent (seule méthode légale pour afficher une
-      UI par-dessus le lockscreen depuis un service — cf DecoyNotifier.kt).
-      Sur Android 14+ (API 34), cette permission doit être accordée
-      MANUELLEMENT par l'utilisateur dans :
-        Paramètres → Apps → Oblivion → Notifications → Notifications plein écran
-      Sur les versions antérieures elle est auto-grantée à l'install.
-    -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
@@ -64,17 +46,6 @@
             </intent-filter>
         </activity>
 
-        <!--
-          Mode Decoy (Option A) : fausse page "Mise à jour système" lancée
-          via notification FullScreenIntent (voir DecoyNotifier.kt).
-            - showWhenLocked : s'affiche même si l'écran est verrouillé
-            - turnScreenOn : allume l'écran s'il est éteint
-            - excludeFromRecents : pas dans la liste des tâches récentes
-            - noHistory : ne reste pas dans le back stack
-            - singleInstance : une seule instance à la fois (évite re-stacking)
-            - exported="false" : lancée uniquement par notre notification
-            - Theme Fullscreen NoActionBar pour un rendu plein écran sans UI système
-        -->
         <activity
             android:name=".ui.decoy.DecoyActivity"
             android:exported="false"
@@ -85,13 +56,6 @@
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
 
-        <!--
-          Étape 1 : Device Admin receiver.
-          ⚠️ Configuration identique à l'app originale qui fonctionne :
-            - permission BIND_DEVICE_ADMIN
-            - meta-data pointant vers res/xml/device_admin.xml (<wipe-data />)
-            - intent-filter DEVICE_ADMIN_ENABLED
-        -->
         <receiver
             android:name=".core.admin.DeviceAdminReceiver"
             android:description="@string/device_admin_description"
@@ -105,13 +69,6 @@
             </intent-filter>
         </receiver>
 
-        <!--
-          Étape 2 : AccessibilityService du Garde-clefs.
-            - permission BIND_ACCESSIBILITY_SERVICE requise par Android
-            - directBootAware : le service se réactive avant que
-              l'utilisateur ait déverrouillé après un reboot
-            - meta-data pointant vers xml/guard_accessibility_service.xml
-        -->
         <service
             android:name=".core.guard.GuardAccessibilityService"
             android:exported="true"
@@ -125,14 +82,6 @@
                 android:resource="@xml/guard_accessibility_service" />
         </service>
 
-        <!--
-          Étape 3 : USB Kill — ForegroundService qui surveille le branchement
-          secteur/USB et déclenche le wipe si l'appareil est verrouillé.
-            - foregroundServiceType="specialUse" : kill-switch anti-forensique
-              (pas de catégorie Google qui colle parfaitement)
-            - le type "specialUse" exige une property expliquant l'usage
-              (requis depuis Android 14 / targetSdk 34 ; inoffensif pour 33)
-        -->
         <service
             android:name=".core.usb.UsbKillService"
             android:exported="false"
@@ -142,25 +91,11 @@
                 android:value="usb_kill_switch" />
         </service>
 
-        <!--
-          Étape 5 : Voice Wipe — ForegroundService qui écoute le micro quand
-          l'écran est verrouillé, reconnaissance offline via Vosk, déclenche
-          le wipe à la détection de la phrase-clé.
-            - foregroundServiceType="microphone" requis depuis Android 10
-              pour accéder au micro depuis un service en arrière-plan
-        -->
         <service
             android:name=".core.voice.VoiceKillService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
-        <!--
-          Étape 3 : redémarrage automatique du service après reboot.
-          LOCKED_BOOT_COMPLETED permet de réagir même avant le premier
-          déverrouillage utilisateur ; nécessite directBootAware si on
-          veut vraiment accéder aux prefs avant unlock (pas indispensable
-          pour cette étape — on redémarre aussi sur BOOT_COMPLETED).
-        -->
         <receiver
             android:name=".core.usb.UsbKillBootReceiver"
             android:enabled="true"
@@ -171,7 +106,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Étape 5 : redémarrage du service Voice Wipe après reboot. -->
         <receiver
             android:name=".core.voice.VoiceKillBootReceiver"
             android:enabled="true"
@@ -182,20 +116,11 @@
             </intent-filter>
         </receiver>
 
-        <!--
-          Wipe programmé : receiver déclenché par AlarmManager à l'heure
-          fixée par l'utilisateur.
-            - exported="false" : déclenchement interne uniquement
-        -->
         <receiver
             android:name=".core.scheduled.ScheduledWipeReceiver"
             android:enabled="true"
             android:exported="false" />
 
-        <!--
-          Wipe programmé : re-arme l'alarme après un reboot (AlarmManager
-          perd ses alarmes au redémarrage).
-        -->
         <receiver
             android:name=".core.scheduled.ScheduledWipeBootReceiver"
             android:enabled="true"
@@ -206,13 +131,6 @@
             </intent-filter>
         </receiver>
 
-        <!--
-          Étape 4 : SMS Wipe — BroadcastReceiver qui écoute les SMS entrants.
-          Si le SMS provient du numéro autorisé et contient le mot-clé,
-          le wipe est déclenché immédiatement.
-            - priority="999" : haute priorité pour intercepter avant les
-              autres apps SMS (messages, Google Messages, etc.)
-        -->
         <receiver
             android:name=".core.sms.SmsKillReceiver"
             android:enabled="true"

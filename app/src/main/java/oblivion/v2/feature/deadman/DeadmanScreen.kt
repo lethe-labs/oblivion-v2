@@ -40,17 +40,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import oblivion.v2.R
 import java.util.concurrent.TimeUnit
 
-/**
- * Écran de configuration du Dead Man's Switch.
- *
- * L'utilisateur choisit :
- *  - l'unité (heures ou jours) via deux FilterChip
- *  - la valeur via un champ numérique
- *  - le master switch (ON/OFF)
- *
- * Le bouton "Check-in maintenant" permet une remise à zéro manuelle.
- * Tout fonctionne en silence : aucune notification, aucun retour visible.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeadmanScreen(
@@ -60,8 +49,6 @@ fun DeadmanScreen(
     val config by vm.config.collectAsStateWithLifecycle()
     val adminActive = vm.isAdminActive()
 
-    // L'unité choisie localement.  On devine l'unité d'après l'intervalle
-    // courant : si divisible par 24h, on affiche en jours, sinon en heures.
     val defaultUnit = remember(config.intervalMs) {
         if (config.intervalMs % TimeUnit.DAYS.toMillis(1) == 0L) IntervalUnit.DAYS else IntervalUnit.HOURS
     }
@@ -112,7 +99,7 @@ fun DeadmanScreen(
                 valueText = valueText,
                 onUnitChange = { newUnit ->
                     unit = newUnit
-                    // Recalcule le texte pour la nouvelle unité.
+
                     valueText = when (newUnit) {
                         IntervalUnit.HOURS -> vm.intervalAsHours(config).toString()
                         IntervalUnit.DAYS -> vm.intervalAsDays(config).toString()
@@ -320,8 +307,6 @@ private fun RulesCard() {
         }
     }
 }
-
-// ── Formatage ─────────────────────────────────────────────────────────
 
 private fun formatAbsolute(ms: Long): String {
     val fmt = java.text.SimpleDateFormat("dd/MM HH:mm", java.util.Locale.getDefault())

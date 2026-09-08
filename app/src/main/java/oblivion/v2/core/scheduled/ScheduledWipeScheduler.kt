@@ -7,17 +7,7 @@ import android.content.Intent
 import android.os.Build
 import oblivion.v2.core.log.SecLog
 
-/**
- * Helper autour de [AlarmManager] pour armer / désarmer l'alarme du
- * wipe programmé.
- *
- * Utilise `setExactAndAllowWhileIdle` — seul mode qui perce Doze pour
- * des échéances au-delà de quelques heures.  Sur Android 12+ exige la
- * permission `SCHEDULE_EXACT_ALARM` (runtime, non-dangereuse mais
- * soumise au toggle utilisateur dans Paramètres).
- */
 object ScheduledWipeScheduler {
-
     private const val TAG = "ScheduledWipeScheduler"
     private const val REQUEST_CODE = 0xDEAD_C0DE.toInt()
 
@@ -27,7 +17,6 @@ object ScheduledWipeScheduler {
         return am.canScheduleExactAlarms()
     }
 
-    /** Arme l'alarme au [wipeAtMs] absolu. */
     fun arm(context: Context, wipeAtMs: Long) {
         try {
             val am = context.getSystemService(AlarmManager::class.java) ?: run {

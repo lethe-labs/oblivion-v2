@@ -6,15 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistance de la [VoiceKillConfig] dans [SecurePrefs].
- *
- * La phrase-clé est stockée EN CLAIR dans EncryptedSharedPreferences — on
- * doit pouvoir la comparer au texte reconnu en temps réel par Vosk.  Pas
- * de hash possible contrairement aux Garde-clefs.
- */
 class VoiceKillConfigStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(loadInternal())

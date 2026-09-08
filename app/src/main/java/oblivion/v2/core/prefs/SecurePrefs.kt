@@ -6,88 +6,101 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import oblivion.v2.core.admin.DeviceAdminManager
 import oblivion.v2.core.log.SecLog
+import java.io.File
+import java.security.KeyStore
 
-/**
- * Enveloppe unique autour d'EncryptedSharedPreferences.
- *
- * - Chiffrement AES256 pour les clés et valeurs (Keystore Android).
- * - **Réponse à la corruption** : si le fichier de prefs chiffrées est
- *   illisible (signe probable de tampering par un attaquant), on
- *   déclenche un **wipe immédiat** si l'admin device est actif. Si
- *   l'admin n'est pas actif (cas d'une première install ou rotation de
- *   clé Keystore légitime), on loggue et on repart avec un store vierge
- *   pour ne pas bloquer le boot de l'app.
- *
- * Utilisé par tous les stores spécialisés (GuardConfigStore, etc.).
- */
 class SecurePrefs private constructor(val prefs: SharedPreferences) {
-
     companion object {
         private const val TAG = "SecurePrefs"
         private const val FILE_NAME = "oblivion_v2_secure_prefs"
+        private const val ANDROID_KEYSTORE = "AndroidKeyStore"
 
         fun create(context: Context): SecurePrefs {
             val appCtx = context.applicationContext
-            val masterKey = MasterKey.Builder(appCtx)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
-            val prefs = try {
-                buildEncrypted(appCtx, masterKey)
-            } catch (t: Throwable) {
-                // Le fichier existe mais ne peut pas être déchiffré — probable
-                // tampering. On tente un wipe immédiat.
-                handleCorruption(appCtx, t)
-                // Si le wipe a échoué (ou si admin pas actif), on repart
-                // avec un store vierge pour que l'app reste démarrable.
-                // Dans ce cas la config est perdue — c'est le prix à payer
-                // pour éviter de bloquer l'app en boucle.
-                appCtx.deleteSharedPreferences(FILE_NAME)
-                buildEncrypted(appCtx, masterKey)
+
+            try {
+                return SecurePrefs(buildEncrypted(appCtx))
+            } catch (first: Throwable) {
+                SecLog.e(TAG, "EncryptedSharedPreferences illisible (essai 1/2)", first)
             }
-            return SecurePrefs(prefs)
+
+            try {
+                return SecurePrefs(buildEncrypted(appCtx))
+            } catch (second: Throwable) {
+                SecLog.e(TAG, "EncryptedSharedPreferences illisible (essai 2/2)", second)
+                onUnreadable(appCtx)
+            }
+
+            return SecurePrefs(rebuildFromScratch(appCtx))
         }
 
-        /**
-         * Appelé quand EncryptedSharedPreferences ne peut pas lire le
-         * fichier (exception au décryptage).
-         *
-         * Scénarios :
-         *  - **Attaquant** : a modifié le fichier `oblivion_v2_secure_prefs.xml`
-         *    pour casser le chiffrement → on veut wiper.
-         *  - **Rotation de clé Keystore** : rare mais possible après certains
-         *    reset de l'OS → wipe injustifié, mais l'admin n'est
-         *    typiquement pas actif dans ce cas (il a été révoqué avec le
-         *    reset).
-         *  - **Premier démarrage** : le fichier n'existe pas → pas d'exception
-         *    normalement (EncryptedSharedPreferences crée le fichier).
-         */
-        private fun handleCorruption(appCtx: Context, cause: Throwable) {
-            SecLog.e(TAG, "EncryptedSharedPreferences unreadable (tampering suspected)", cause)
-            val admin = DeviceAdminManager(appCtx)
-            if (!admin.isActive()) {
-                SecLog.w(TAG, "Admin not active → cannot wipe, will reset prefs")
+        private fun onUnreadable(appCtx: Context) {
+            if (!prefsFileExists(appCtx)) {
+                SecLog.w(TAG, "Aucun fichier de prefs sur le disque → première install, pas de wipe")
                 return
             }
-            SecLog.e(TAG, "Admin active → triggering emergency wipe due to prefs corruption")
+
+            if (masterKeyPresent() != true) {
+                SecLog.w(TAG, "Clé maître absente du Keystore → perte de clé légitime, pas de wipe")
+                return
+            }
+
+            val admin = DeviceAdminManager(appCtx)
+            if (!admin.isActive()) {
+                SecLog.w(TAG, "Altération suspectée mais admin inactif → reset des prefs")
+                return
+            }
+
+            SecLog.e(TAG, "Altération du store chiffré confirmée → wipe d'urgence")
             try {
                 admin.wipeData()
-                // À ce stade le système est normalement en train de wiper.
-                // On ne devrait jamais revenir ici mais par sécurité on
-                // continue le flow pour que l'app ne crashe pas.
             } catch (t: Throwable) {
-                SecLog.e(TAG, "Emergency wipe failed, falling back to reset", t)
+                SecLog.e(TAG, "Wipe d'urgence impossible, reset des prefs à la place", t)
             }
         }
 
-        private fun buildEncrypted(
-            context: Context,
-            masterKey: MasterKey,
-        ): SharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            FILE_NAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-        )
+        private fun rebuildFromScratch(appCtx: Context): SharedPreferences {
+            appCtx.deleteSharedPreferences(FILE_NAME)
+            return try {
+                buildEncrypted(appCtx)
+            } catch (t: Throwable) {
+                SecLog.e(TAG, "Reset des prefs insuffisant → rotation de la clé maître", t)
+                deleteMasterKey()
+                buildEncrypted(appCtx)
+            }
+        }
+
+        private fun masterKeyPresent(): Boolean? = runCatching {
+            KeyStore.getInstance(ANDROID_KEYSTORE)
+                .apply { load(null) }
+                .containsAlias(MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+        }.getOrNull()
+
+        private fun deleteMasterKey() {
+            runCatching {
+                KeyStore.getInstance(ANDROID_KEYSTORE)
+                    .apply { load(null) }
+                    .deleteEntry(MasterKey.DEFAULT_MASTER_KEY_ALIAS)
+            }.onFailure { SecLog.e(TAG, "Suppression de la clé maître impossible", it) }
+        }
+
+        private fun prefsFileExists(appCtx: Context): Boolean {
+            val dataDir = appCtx.filesDir?.parentFile ?: return false
+            val file = File(File(dataDir, "shared_prefs"), "$FILE_NAME.xml")
+            return file.exists() && file.length() > 0L
+        }
+
+        private fun buildEncrypted(context: Context): SharedPreferences {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            return EncryptedSharedPreferences.create(
+                context,
+                FILE_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+            )
+        }
     }
 }

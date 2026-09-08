@@ -45,18 +45,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import oblivion.v2.R
 import oblivion.v2.core.voice.VoiceKillConfig
 
-/**
- * Écran Voice Wipe (Étape 5).
- *
- * Contenu :
- *  - rappel admin device requis
- *  - carte de demande runtime de POST_NOTIFICATIONS (Android 13+)
- *  - carte de demande runtime de RECORD_AUDIO
- *  - champ de saisie de la phrase-clé
- *  - toggle "seuil strict" (toujours recommandé)
- *  - toggle master (démarre le service foreground)
- *  - rappel des règles
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VoiceKillScreen(
@@ -67,7 +55,6 @@ fun VoiceKillScreen(
     val adminActive = vm.isAdminActive()
     val ctx = LocalContext.current
 
-    // Permissions runtime.
     val needsNotifPerm = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     var hasNotifPerm by remember {
         mutableStateOf(
@@ -92,7 +79,6 @@ fun VoiceKillScreen(
         ActivityResultContracts.RequestPermission(),
     ) { hasMicPerm = it }
 
-    // Buffer local pour l'édition de la phrase avant sauvegarde.
     var phraseInput by remember(config.phrase) { mutableStateOf(config.phrase) }
 
     val phraseValid = phraseInput.trim().length in

@@ -10,15 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import oblivion.v2.core.log.SecLog
 import oblivion.v2.core.wipe.WipeGateway
 
-/**
- * Receiver invoqué par l'AlarmManager à l'heure programmée.
- *
- * Déclenche immédiatement le wipe via [WipeGateway.wipeNow].  En cas
- * d'échec (admin non actif), on efface juste la config pour éviter
- * qu'elle reste armée en permanence.
- */
 class ScheduledWipeReceiver : BroadcastReceiver() {
-
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface ScheduledWipeEntryPoint {
@@ -48,8 +40,7 @@ class ScheduledWipeReceiver : BroadcastReceiver() {
             SecLog.e(TAG, "Scheduled wipe firing NOW")
             val r = gateway.wipeNow()
             SecLog.e(TAG, "wipeNow() returned $r")
-            // Si le wipe n'a pas tué le process, nettoyer la config
-            // évite de re-déclencher indéfiniment.
+
             store.clear()
         } catch (t: Throwable) {
             SecLog.e(TAG, "onReceive threw", t)

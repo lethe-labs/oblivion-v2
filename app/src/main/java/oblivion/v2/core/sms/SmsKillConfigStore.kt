@@ -7,14 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistence chiffrée de [SmsKillConfig] via EncryptedSharedPreferences.
- *
- * Le mot-clé est stocké en clair (comme la phrase Voice Wipe) car
- * on doit le comparer au contenu brut du SMS reçu.
- */
 class SmsKillConfigStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(load())

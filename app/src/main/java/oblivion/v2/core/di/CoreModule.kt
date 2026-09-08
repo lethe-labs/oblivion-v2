@@ -17,16 +17,9 @@ import oblivion.v2.core.voice.VoiceKillConfigStore
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Singleton
 
-/**
- * Module Hilt pour les singletons "core" (infra partagée).
- *
- * Scope : SingletonComponent → une seule instance pour toute la durée de
- * vie du process.  Parfait pour des stores et des facades.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object CoreModule {
-
     @Provides
     @Singleton
     fun provideSecurePrefs(@ApplicationContext context: Context): SecurePrefs =

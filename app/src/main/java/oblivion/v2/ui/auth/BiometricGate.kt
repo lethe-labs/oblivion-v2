@@ -29,21 +29,6 @@ import oblivion.v2.R
 import oblivion.v2.core.auth.BiometricAuthState
 import oblivion.v2.core.auth.BiometricAuthenticator
 
-/**
- * "Porte" d'authentification biométrique qui masque [content] tant que
- * l'utilisateur n'est pas authentifié.
- *
- * Comportement :
- *  - Si `authState.isAuthenticated == true` → affiche directement [content].
- *  - Sinon → affiche un écran de verrouillage avec bouton
- *    "Déverrouiller" qui lance le BiometricPrompt.
- *  - Au démarrage, le prompt se déclenche automatiquement une fois.
- *
- * @param authState Le state holder partagé (injecté via Hilt dans MainActivity
- *                  et passé ici explicitement).
- * @param autoPrompt Si `true` (défaut), lance le prompt dès que l'écran
- *                   est affiché sans attendre un clic utilisateur.
- */
 @Composable
 fun BiometricGate(
     authState: BiometricAuthState,
@@ -66,7 +51,6 @@ fun BiometricGate(
         return
     }
 
-    // Déclenche automatiquement le prompt au premier affichage non-authentifié.
     LaunchedEffect(Unit) {
         if (autoPrompt && activity != null) {
             launchPrompt(activity, authState)
@@ -86,10 +70,6 @@ private fun launchPrompt(
 ) {
     val capability = BiometricAuthenticator.canAuthenticate(activity)
     if (capability == BiometricAuthenticator.Capability.UNAVAILABLE) {
-        // Pas de biométrie ni PIN système disponible : on laisse passer
-        // pour ne pas bloquer l'utilisateur (il n'y a rien à authentifier
-        // avec). Dans ce cas l'app reste utilisable mais sans protection
-        // biométrique — c'est au système d'avoir un PIN de verrouillage.
         authState.markAuthenticated()
         return
     }
@@ -98,7 +78,7 @@ private fun launchPrompt(
         title = activity.getString(R.string.biometric_title),
         subtitle = activity.getString(R.string.biometric_subtitle),
         onSuccess = { authState.markAuthenticated() },
-        onFailure = { _, _ -> /* l'utilisateur pourra retaper via le bouton */ },
+        onFailure = { _, _ ->  },
     )
 }
 

@@ -42,34 +42,10 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import oblivion.v2.R
 
-/**
- * Écran leurre "Mise à jour système" lancé via **FullScreenIntent**
- * notification (Mode Decoy Option A).
- *
- * Sur Android 10+, ni `startActivity()` depuis un service, ni un overlay
- * `TYPE_APPLICATION_OVERLAY` ne peuvent s'afficher par-dessus le lockscreen
- * (restrictions BAL + anti-phishing). La seule méthode qui contourne ces
- * barrières est la notification `fullScreenIntent` : le système Android
- * lui-même dismisse le keyguard et lance l'activity en plein écran.
- *
- * L'activity est déclarée dans le manifest avec :
- *  - `showWhenLocked=true` : s'affiche sur le lockscreen
- *  - `turnScreenOn=true` : allume l'écran si éteint
- *  - `excludeFromRecents=true` : pas dans la liste des tâches
- *  - `noHistory=true` : ne reste pas dans le back stack
- *  - `launchMode=singleInstance` : une seule instance à la fois
- *
- * Le design imite le vrai écran "Mise à jour système" Android : fond
- * gris foncé, cercle vert façon logo Android, barre de progression
- * bleue Google 0 → 100 % sur 30 s, compteur %, note "Ne pas éteindre".
- */
 class DecoyActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Affichage sur le lockscreen + allumage de l'écran. API 27+ pour
-        // les méthodes ; flags window comme fallback API 26.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
@@ -90,16 +66,10 @@ class DecoyActivity : ComponentActivity() {
         }
     }
 
-    /** Le bouton retour est neutralisé — rien ne doit quitter l'écran leurre. */
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        // no-op
     }
 }
-
-// ════════════════════════════════════════════════════════════════════
-// UI : fausse page "Mise à jour système"
-// ════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun FakeSystemUpdateScreen() {

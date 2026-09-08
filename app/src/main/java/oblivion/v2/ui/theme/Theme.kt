@@ -10,9 +10,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-/**
- * Palette Oblivion — toujours en dark mode, rouge/noir.
- */
 private val OblivionColorScheme = darkColorScheme(
     primary = OblivionRed,
     onPrimary = Color.White,
@@ -44,20 +41,14 @@ private val OblivionColorScheme = darkColorScheme(
     outlineVariant = OblivionOutlineVariant,
 )
 
-/**
- * Thème Oblivion — dark only, rouge/noir, pas de Material You.
- *
- * Force la status bar et la nav bar en noir pour une immersion totale.
- */
 @Composable
 fun OblivionTheme(
-    darkTheme: Boolean = true,       // toujours dark
-    dynamicColor: Boolean = false,   // pas de Material You
+    darkTheme: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = OblivionColorScheme
 
-    // Colore la status bar et la navigation bar en noir
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

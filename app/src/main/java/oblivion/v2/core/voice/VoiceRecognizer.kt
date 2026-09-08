@@ -12,32 +12,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-/**
- * Wrapper haut niveau autour de Vosk pour reconnaître une phrase-clé en
- * streaming micro.
- *
- * Flux :
- *  1. [unpackModel] copie `assets/model-fr/` vers le storage interne
- *     (idempotent : ne recopie que si le dossier cible est absent).
- *  2. [start] charge le modèle dans la RAM, ouvre le micro (16 kHz) et
- *     notifie [onPhraseDetected] dès que la phrase cible est reconnue.
- *  3. [stop] libère micro et modèle.
- */
 class VoiceRecognizer(private val appCtx: Context) {
-
     private var speechService: SpeechService? = null
     private var model: Model? = null
     private var recognizer: Recognizer? = null
 
-    /**
-     * Copie le modèle Vosk depuis `assets/model-<lang>/` vers le storage
-     * interne (`filesDir/model-<lang>/`).  Idempotent : si le dossier cible
-     * existe déjà et contient `final.mdl`, on skip la copie.
-     *
-     * @param language code de langue (ex. `"fr"` ou `"en"`).  Détermine
-     *                 le sous-dossier d'assets à utiliser : `assets/model-<language>/`.
-     * @return chemin absolu du dossier modèle extrait.
-     */
     fun unpackModel(language: String = "fr"): String {
         val assetDir = "model-$language"
         val target = File(appCtx.filesDir, assetDir)
@@ -62,10 +41,6 @@ class VoiceRecognizer(private val appCtx: Context) {
         return target.absolutePath
     }
 
-    /**
-     * Démarre l'écoute.  [onPhraseDetected] est appelée sur le thread Vosk
-     * dès que la phrase-clé est reconnue.
-     */
     @Throws(Exception::class)
     fun start(
         modelPath: String,
@@ -93,8 +68,7 @@ class VoiceRecognizer(private val appCtx: Context) {
                 if (text.isNotBlank()) {
                     SecLog.d(TAG, "partial: '$text'")
                 }
-                // En mode strict on ne vérifie que les résultats finaux
-                // pour éviter les faux positifs sur des partiels incomplets.
+
                 if (!strict) checkMatch(text)
             }
 
@@ -129,9 +103,7 @@ class VoiceRecognizer(private val appCtx: Context) {
             private fun checkMatch(rawText: String) {
                 val text = stripAccents(normalize(rawText))
                 if (text.isEmpty()) return
-                // Toujours "contains" — même en strict.  Un match exact
-                // est quasi impossible car Vosk inclut souvent des mots
-                // parasites avant/après la phrase.
+
                 val matched = text.contains(normalizedPhrase)
                 if (matched) {
                     fired = true
@@ -159,26 +131,18 @@ class VoiceRecognizer(private val appCtx: Context) {
 
     fun isRunning(): Boolean = speechService != null
 
-    // ── Asset copy ──────────────────────────────────────────────────────────
-
-    /**
-     * Copie récursivement un dossier d'assets vers le filesystem.
-     * [AssetManager.list] renvoie les entrées enfants ; si une entrée
-     * a elle-même des enfants, c'est un sous-dossier.
-     */
     private fun copyAssetDir(am: AssetManager, assetPath: String, targetDir: File) {
         val entries = am.list(assetPath)
         if (entries.isNullOrEmpty()) {
-            // C'est un fichier (leaf) → copier
             copyAssetFile(am, assetPath, targetDir)
             return
         }
-        // C'est un dossier → créer + récurse
+
         targetDir.mkdirs()
         for (entry in entries) {
             val childAsset = "$assetPath/$entry"
             val childTarget = File(targetDir, entry)
-            // Vérifie si c'est un dossier ou un fichier
+
             val sub = am.list(childAsset)
             if (!sub.isNullOrEmpty()) {
                 copyAssetDir(am, childAsset, childTarget)
@@ -209,8 +173,6 @@ class VoiceRecognizer(private val appCtx: Context) {
         }
     }
 
-    // ── JSON parsing ────────────────────────────────────────────────────────
-
     private fun extractPartial(raw: String?): String? {
         if (raw.isNullOrBlank()) return null
         return runCatching { JSONObject(raw).optString("partial", "") }.getOrNull()
@@ -223,15 +185,10 @@ class VoiceRecognizer(private val appCtx: Context) {
 
     private fun normalize(s: String): String =
         s.lowercase()
-            .replace(PUNCTUATION_REGEX, "")   // Vosk ne produit jamais de ponctuation
+            .replace(PUNCTUATION_REGEX, "")
             .trim()
             .replace(WHITESPACE_REGEX, " ")
 
-    /**
-     * Retire les accents et diacritiques (é→e, è→e, ê→e, à→a, ù→u, etc.)
-     * pour que la comparaison tolère les différences d'accentuation entre
-     * ce que l'utilisateur tape et ce que Vosk produit.
-     */
     private fun stripAccents(s: String): String {
         val normalized = java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
         return DIACRITICS_REGEX.replace(normalized, "")
@@ -240,7 +197,7 @@ class VoiceRecognizer(private val appCtx: Context) {
     companion object {
         private const val TAG = "VoiceRecognizer"
         private const val SAMPLE_RATE_F = 16_000f
-        /** Fichier qui doit exister pour valider que le modèle est complet. */
+
         private const val MARKER_FILE = "final.mdl"
         private val WHITESPACE_REGEX = Regex("\\s+")
         private val PUNCTUATION_REGEX = Regex("[^\\p{L}\\p{N}\\s]")

@@ -7,17 +7,8 @@ import oblivion.v2.core.log.SecLog
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-/**
- * Redémarre [UsbKillService] après un reboot si le trigger est activé.
- *
- * Déclaré dans le manifest avec les actions :
- *  - `android.intent.action.BOOT_COMPLETED`
- *  - `android.intent.action.LOCKED_BOOT_COMPLETED` (direct boot : avant
- *    déverrouillage utilisateur après reboot)
- */
 @AndroidEntryPoint
 class UsbKillBootReceiver : BroadcastReceiver() {
-
     @Inject lateinit var configStore: UsbKillConfigStore
 
     override fun onReceive(context: Context, intent: Intent) {

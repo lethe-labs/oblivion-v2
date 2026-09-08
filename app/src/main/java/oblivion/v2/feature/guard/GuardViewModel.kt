@@ -20,32 +20,12 @@ import oblivion.v2.core.guard.GuardConfigStore
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Inject
 
-/**
- * ViewModel de l'écran Garde-clefs.
- *
- * Expose :
- *  - la [GuardConfig] courante (observée depuis [GuardConfigStore])
- *  - l'état du service d'accessibilité (activé au niveau système ou pas)
- *  - le compteur courant de tentatives échouées (lu depuis DPM, donc piloté
- *    par le système : fiable, pas besoin d'annonces accessibility)
- *
- * Fournit :
- *  - toggles master + 4 détecteurs
- *  - écriture des PINs (hashage transparent dans le store)
- *  - réglage de la longueur-piège et du seuil de tentatives
- *  - Intent pour ouvrir les réglages d'accessibilité
- *
- * NOTE : depuis l'intégration de `setMaximumFailedPasswordsForWipe`,
- * c'est Android qui compte les échecs PIN et déclenche le wipe natif.  Le
- * ViewModel ne fait que lire le compteur pour l'affichage.
- */
 @HiltViewModel
 class GuardViewModel @Inject constructor(
     app: Application,
     private val store: GuardConfigStore,
     private val wipeGateway: WipeGateway,
 ) : AndroidViewModel(app) {
-
     val config: StateFlow<GuardConfig> = store.config
 
     private val _accessibilityEnabled = MutableStateFlow(computeAccessibilityEnabled())
@@ -65,29 +45,21 @@ class GuardViewModel @Inject constructor(
         _failedAttemptsCount.value = wipeGateway.getCurrentFailedAttempts()
     }
 
-    // ── Master ──────────────────────────────────────────────────────────────
-
     fun setMasterEnabled(enabled: Boolean) {
         store.save(config.value.copy(masterEnabled = enabled))
     }
 
-    // ── Type A ──────────────────────────────────────────────────────────────
-
     fun setTypeAEnabled(enabled: Boolean) {
         val current = config.value
         if (enabled && current.typeAHash.isEmpty()) {
-            // On n'active pas sans PIN défini
             return
         }
         store.save(current.copy(typeAEnabled = enabled))
     }
 
-    /** `pin` vide efface et désactive Type A. */
     fun setTypeAPin(pin: String) {
         store.setTypeAPin(pin)
     }
-
-    // ── Type B ──────────────────────────────────────────────────────────────
 
     fun setTypeBEnabled(enabled: Boolean) {
         val current = config.value
@@ -100,8 +72,6 @@ class GuardViewModel @Inject constructor(
         store.save(config.value.copy(typeBLength = safe))
     }
 
-    // ── EMERGENCY ───────────────────────────────────────────────────────────
-
     fun setEmergencyEnabled(enabled: Boolean) {
         val current = config.value
         if (enabled && current.emergencyHash.isEmpty()) return
@@ -111,8 +81,6 @@ class GuardViewModel @Inject constructor(
     fun setEmergencyPin(pin: String) {
         store.setEmergencyPin(pin)
     }
-
-    // ── Failed attempts (politique système via DPM) ─────────────────────────
 
     fun setFailedAttemptsEnabled(enabled: Boolean) {
         val current = config.value
@@ -125,15 +93,9 @@ class GuardViewModel @Inject constructor(
         store.save(config.value.copy(failedAttemptsThreshold = safe))
     }
 
-    /**
-     * Le compteur système ne peut pas être remis à zéro par notre app — seul
-     * un déverrouillage réussi le fait.  Cette méthode rafraîchit l'affichage.
-     */
     fun refreshFailedAttemptsCount() {
         _failedAttemptsCount.value = wipeGateway.getCurrentFailedAttempts()
     }
-
-    // ── Accessibility helpers ───────────────────────────────────────────────
 
     fun openAccessibilitySettingsIntent(): Intent =
         Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -141,8 +103,7 @@ class GuardViewModel @Inject constructor(
 
     private fun computeAccessibilityEnabled(): Boolean {
         val ctx = getApplication<Application>()
-        // Méthode 1 : Settings.Secure ENABLED_ACCESSIBILITY_SERVICES (string
-        // avec les services activés séparés par ':').
+
         val enabledServices = runCatching {
             Settings.Secure.getString(
                 ctx.contentResolver,
@@ -158,7 +119,7 @@ class GuardViewModel @Inject constructor(
                 return true
             }
         }
-        // Méthode 2 (fallback) : AccessibilityManager
+
         val am = ctx.getSystemService(Context.ACCESSIBILITY_SERVICE)
             as? AccessibilityManager ?: return false
         if (!am.isEnabled) return false

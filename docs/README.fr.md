@@ -7,7 +7,7 @@
 **Système anti-forensic de wipe sous contrainte pour Android**
 
 [![Licence : AGPL v3](https://img.shields.io/badge/Licence-AGPL_v3-red.svg)](../LICENSE)
-[![Android : 10+](https://img.shields.io/badge/Android-10%20→%2014+-green.svg)]()
+[![Android : 8.0+](https://img.shields.io/badge/Android-8.0%20→%2014+-green.svg)]()
 [![Offline](https://img.shields.io/badge/100%25-offline-blue.svg)]()
 [![Télémétrie : 0](https://img.shields.io/badge/Télémétrie-0-black.svg)]()
 
@@ -68,7 +68,7 @@ avec le réseau.
 |---|---|
 | Chiffrement | AES-256-GCM via `EncryptedSharedPreferences` |
 | Clé maître | Android Keystore hardware-backed |
-| Hash PIN | SHA-256 + sel aléatoire 32 bytes |
+| Hash PIN | PBKDF2-HMAC-SHA256, 100 000 itérations + sel aléatoire 32 octets |
 | Comparaison PIN | Timing-safe (résistant aux side-channels) |
 | Mécanisme de wipe | `DevicePolicyManager.wipeData()` (Device Admin natif) |
 | Reconnaissance vocale | Vosk (offline, modèles small FR + EN bundlés) |
@@ -101,9 +101,15 @@ avec le réseau.
 ### Commandes de build
 
 ```bash
-git clone https://github.com/lethe-labs/oblivion.git
-cd oblivion
+git clone https://github.com/lethe-labs/oblivion-v2.git
+cd oblivion-v2
 ./gradlew assembleRelease
+```
+
+Tests unitaires (JVM pur, aucun appareil requis) :
+
+```bash
+./gradlew testDebugUnitTest
 ```
 
 APK généré : `app/build/outputs/apk/release/app-release.apk`
@@ -123,19 +129,18 @@ Ce fichier est dans `.gitignore` et **ne doit jamais être commit**.
 
 ### Modèles Vosk
 
-Le repo embarque le **modèle français small** (~40 Mo) dans
-`app/src/main/assets/model-fr/`. Le dossier du modèle anglais existe mais
-est vide — tu dois ajouter le modèle toi-même pour activer la reconnaissance
-vocale en anglais.
+Le repo embarque **les modèles français et anglais** dans
+`app/src/main/assets/model-fr/` et `app/src/main/assets/model-en/`
+(~65 Mo chacun). Rien à télécharger pour un build standard.
 
-Téléchargement depuis <https://alphacephei.com/vosk/models> :
+Pour remplacer un modèle, télécharge-le depuis
+<https://alphacephei.com/vosk/models> :
 
 - **FR** : `vosk-model-small-fr-pguyot`
 - **EN** : `vosk-model-small-en-us-0.15`
 
 Extrais le ZIP et copie son contenu dans `app/src/main/assets/model-<lang>/`,
-en respectant la structure du modèle FR existant (voir
-`app/src/main/assets/model-en/README.md` pour les détails).
+en respectant la structure des modèles déjà présents.
 
 Les deux modèles sont sous licence **Apache 2.0** — usage commercial autorisé.
 
@@ -176,6 +181,20 @@ documentées :
 - **WorkManager a un minimum de 15 minutes** en mode périodique. Le Dead
   Man's Switch vérifie toutes les 15 minutes ; prévoir jusqu'à ce délai
   entre l'expiration et le wipe.
+- **Le numéro expéditeur d'un SMS est usurpable.** Le réseau n'authentifie
+  pas l'identité de l'expéditeur, et des passerelles commerciales permettent
+  de la forger. Qui connaît ton mot-clé peut donc déclencher le wipe à
+  distance. Aucun contrôle côté récepteur ne peut l'empêcher : traite le
+  mot-clé comme un secret de même valeur que le PIN de détresse, et désactive
+  le trigger SMS si le wipe à distance ne vaut pas ce risque. Saisir le
+  numéro autorisé au format international complet (`+33…`) est plus strict
+  que le format national.
+- **Choisis un PIN de détresse qui n'est pas un suffixe de ton vrai PIN.**
+  Les triggers du lockscreen se déclenchent dès que les derniers chiffres
+  saisis correspondent au secret — c'est ce qui leur permet de fonctionner
+  sans appuyer sur « valider », et de fonctionner encore après une saisie
+  ratée. Conséquence : un vrai PIN `981234` déclencherait un PIN de détresse
+  `1234` à chaque déverrouillage normal.
 
 ---
 

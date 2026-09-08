@@ -7,12 +7,8 @@ import oblivion.v2.core.log.SecLog
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-/**
- * Redémarre [VoiceKillService] après un reboot si le trigger est activé.
- */
 @AndroidEntryPoint
 class VoiceKillBootReceiver : BroadcastReceiver() {
-
     @Inject lateinit var configStore: VoiceKillConfigStore
 
     override fun onReceive(context: Context, intent: Intent) {

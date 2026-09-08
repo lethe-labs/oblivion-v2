@@ -7,12 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.log.SecLog
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistance chiffrée de la config Wipe Programmé via
- * EncryptedSharedPreferences.  Expose un [StateFlow] pour l'UI.
- */
 class ScheduledWipeStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(load())

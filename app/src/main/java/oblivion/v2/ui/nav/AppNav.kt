@@ -15,9 +15,6 @@ import oblivion.v2.feature.usb.UsbKillScreen
 import oblivion.v2.feature.voice.VoiceKillScreen
 import oblivion.v2.feature.wipetest.WipeTestScreen
 
-/**
- * Destinations de navigation de l'app.
- */
 object Routes {
     const val DASHBOARD = "dashboard"
     const val WIPE_TEST = "wipeTest"

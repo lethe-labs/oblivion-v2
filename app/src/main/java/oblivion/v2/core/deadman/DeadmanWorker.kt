@@ -10,22 +10,10 @@ import dagger.hilt.components.SingletonComponent
 import oblivion.v2.core.log.SecLog
 import oblivion.v2.core.wipe.WipeGateway
 
-/**
- * Worker périodique qui vérifie si l'échéance du Dead Man's Switch est
- * dépassée et déclenche le wipe si c'est le cas.
- *
- * On utilise le pattern [EntryPoint] Hilt plutôt que `hilt-work` complet :
- * plus simple, moins de dépendances, et ici c'est le seul Worker de l'app.
- *
- * Silencieux : pas de notification, pas de retour visible à l'utilisateur.
- * L'utilisateur final (le détenteur du téléphone dans un scénario adverse)
- * ne doit pas savoir qu'un switch est en place.
- */
 class DeadmanWorker(
     appContext: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(appContext, params) {
-
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface DeadmanEntryPoint {
@@ -46,7 +34,6 @@ class DeadmanWorker(
             SecLog.d(TAG, "doWork() enabled=${cfg.enabled} ready=${cfg.isReady()} remainingMs=${cfg.remainingMs()}")
 
             if (!cfg.isReady()) {
-                // Rien à faire : switch désactivé ou pas encore de check-in.
                 return Result.success()
             }
 
@@ -62,7 +49,7 @@ class DeadmanWorker(
             Result.success()
         } catch (t: Throwable) {
             SecLog.e(TAG, "DeadmanWorker threw", t)
-            // Retry pour ne pas rester silencieusement cassé.
+
             Result.retry()
         }
     }

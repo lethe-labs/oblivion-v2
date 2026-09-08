@@ -5,7 +5,6 @@ plugins {
     id 'com.google.dagger.hilt.android'
 }
 
-// Charge les credentials du keystore depuis keystore.properties (non versionné).
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
@@ -19,11 +18,7 @@ android {
     defaultConfig {
         applicationId "oblivion.v2"
         minSdk 26
-        // ⚠️ targetSdk volontairement à 33 et non 34.
-        // Depuis Android 14 (API 34), DevicePolicyManager.wipeData() est
-        // bloqué pour les apps qui ciblent API 34+ et qui ne sont pas
-        // Device Owner / Profile Owner. Rester à 33 préserve la capacité
-        // de wipe pour un simple device admin (ce que l'ancienne app fait).
+
         targetSdk 33
         versionCode 1
         versionName "0.1.0"
@@ -31,7 +26,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary true }
 
-        // Restrict to ABIs Vosk ships (will be needed at Étape 5).
         ndk { abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64' }
     }
 
@@ -66,6 +60,13 @@ android {
         jvmTarget = '17'
     }
 
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            all { testTask -> testTask.testLogging { exceptionFormat = 'full' } }
+        }
+    }
+
     buildFeatures {
         compose true
         buildConfig true
@@ -75,8 +76,6 @@ android {
         kotlinCompilerExtensionVersion '1.5.8'
     }
 
-    // Les fichiers du modèle Vosk (> 10 Mo chacun) ne doivent PAS être
-    // compressés — sinon AssetManager ne peut pas les ouvrir correctement.
     aaptOptions {
         noCompress 'fst', 'mdl', 'conf', 'int'
     }
@@ -99,14 +98,12 @@ android {
 }
 
 dependencies {
-    // Core
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.activity:activity-compose:1.8.2'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0'
 
-    // Compose (BOM manages versions)
     implementation platform('androidx.compose:compose-bom:2024.02.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -115,33 +112,22 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
     debugImplementation 'androidx.compose.ui:ui-tooling'
 
-    // Navigation
     implementation 'androidx.navigation:navigation-compose:2.7.7'
 
-    // Hilt
     implementation 'com.google.dagger:hilt-android:2.50'
     kapt 'com.google.dagger:hilt-compiler:2.50'
     implementation 'androidx.hilt:hilt-navigation-compose:1.1.0'
 
-    // Security — EncryptedSharedPreferences (Tink/AES)
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
 
-    // Biometric authentication — verrouille l'accès au Dashboard derrière
-    // empreinte / face unlock / PIN système avec timeout d'inactivité de 1 min.
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.fragment:fragment-ktx:1.6.2'
 
-    // WorkManager — pour le Dead Man's Switch (tâche périodique qui vérifie
-    // l'échéance même app fermée).
     implementation 'androidx.work:work-runtime-ktx:2.9.0'
 
-    // Vosk — reconnaissance vocale 100% offline (Étape 5 Voice Wipe).
-    // Le modèle français small (~40 Mo) est fourni séparément dans
-    // app/src/main/assets/model-fr/ — voir README de l'Étape 5.
     implementation 'com.alphacephei:vosk-android:0.3.47'
     implementation 'net.java.dev.jna:jna:5.13.0@aar'
 
-    // Tests
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

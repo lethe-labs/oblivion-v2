@@ -1,12 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Policies déclarées pour le DeviceAdminReceiver d'Oblivion.
-   - <wipe-data />  : requis par DevicePolicyManager.wipeData()
-   - <watch-login /> : requis par setMaximumFailedPasswordsForWipe() —
-     utilisé par le Garde-clefs pour armer le wipe natif Android après N
-     tentatives de PIN échouées. Sans ce flag, l'appel lève une
-     SecurityException "did not specify uses-policy for: watch-login".
--->
+
 <device-admin>
     <uses-policies>
         <wipe-data />

@@ -5,7 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import oblivion.v2.core.sms.SmsKillConfig
 import oblivion.v2.core.sms.SmsKillConfigStore
-import oblivion.v2.core.sms.SmsKillReceiver
+import oblivion.v2.core.sms.SmsMatcher
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Inject
 
@@ -14,7 +14,6 @@ class SmsKillViewModel @Inject constructor(
     private val configStore: SmsKillConfigStore,
     private val wipeGateway: WipeGateway,
 ) : ViewModel() {
-
     val config: StateFlow<SmsKillConfig> = configStore.config
 
     fun setSenderNumber(value: String) = configStore.setSenderNumber(value)
@@ -28,21 +27,14 @@ class SmsKillViewModel @Inject constructor(
         configStore.setEnabled(value)
     }
 
-    /**
-     * Simule la réception d'un SMS pour tester le trigger sans carte SIM.
-     * Appelle le même code de matching que [SmsKillReceiver].
-     *
-     * @return true si le keyword a matché (= wipe aurait été déclenché).
-     */
     fun simulateSms(sender: String, body: String): Boolean {
         val cfg = configStore.load()
         if (!cfg.isReady()) return false
 
-        val normalizedSender = SmsKillReceiver.normalizeSender(sender)
-        if (!SmsKillReceiver.senderMatches(normalizedSender, cfg.senderNumber)) return false
-        if (!SmsKillReceiver.keywordMatches(body, cfg.keyword)) return false
+        val normalizedSender = SmsMatcher.normalize(sender)
+        if (!SmsMatcher.senderMatches(normalizedSender, cfg.senderNumber)) return false
+        if (!SmsMatcher.keywordMatches(body, cfg.keyword)) return false
 
-        // Match ! En vrai ça wiperait. En mode test on retourne juste true.
         return true
     }
 }

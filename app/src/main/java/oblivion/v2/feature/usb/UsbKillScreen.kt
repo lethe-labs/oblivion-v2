@@ -44,17 +44,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import oblivion.v2.R
 import oblivion.v2.core.usb.UsbKillConfig
 
-/**
- * Écran de configuration du déclencheur USB Kill (Étape 3).
- *
- * Contenu :
- *  - statut Device Admin (requis)
- *  - demande runtime de POST_NOTIFICATIONS (Android 13+)
- *  - toggle master du trigger (démarre/stoppe le service foreground)
- *  - slider du délai de grâce (0..30 s)
- *  - rappel des règles : ne se déclenche que si l'écran est verrouillé,
- *    débranchement pendant le compte à rebours = abort
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsbKillScreen(
@@ -65,7 +54,6 @@ fun UsbKillScreen(
     val adminActive = vm.isAdminActive()
     val ctx = LocalContext.current
 
-    // Suivi runtime de POST_NOTIFICATIONS (Android 13+).
     val needsNotifPerm = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     var hasNotifPerm by remember {
         mutableStateOf(
@@ -137,10 +125,6 @@ fun UsbKillScreen(
                 canToggle = adminActive,
                 onToggle = { turnOn ->
                     if (turnOn && needsNotifPerm && !hasNotifPerm) {
-                        // On demande la permission AVANT d'activer : si
-                        // accordée, l'utilisateur pourra réappuyer.  Si
-                        // refusée, la notif sera cachée mais le service
-                        // fonctionnera quand même.
                         notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                     vm.setEnabled(turnOn)

@@ -54,15 +54,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import oblivion.v2.R
 
-/**
- * Écran de test du wipe (Étape 1).
- *
- * Pour diagnostic :
- *  - affiche le ComponentName exact utilisé par l'admin
- *  - bouton "Ouvrir les paramètres Admin" (pour vérifier côté système)
- *  - affiche un Snackbar avec le résultat de l'appel wipe
- *    (si l'appareil ne s'efface pas, on sait pourquoi)
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WipeTestScreen(
@@ -81,7 +72,6 @@ fun WipeTestScreen(
     var showStep2 by remember { mutableStateOf(false) }
     var typedConfirmation by remember { mutableStateOf("") }
 
-    // Affichage du résultat du wipe (si l'appareil ne s'est pas effacé).
     LaunchedEffect(lastWipeMessage) {
         lastWipeMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -89,8 +79,6 @@ fun WipeTestScreen(
         }
     }
 
-    // Rafraîchit l'état Device Admin quand l'utilisateur revient d'un écran
-    // système (activation de l'admin), équivalent à l'ancien onResume().
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -150,8 +138,6 @@ fun WipeTestScreen(
             OutlinedButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    // Essayer d'ouvrir la liste des admins directement, sinon
-                    // tomber sur l'écran Sécurité général.
                     val intents = listOf(
                         Intent().setComponent(
                             android.content.ComponentName(
@@ -224,7 +210,6 @@ fun WipeTestScreen(
         }
     }
 
-    // ── Étape de confirmation #1 ────────────────────────────────────────────
     if (showStep1) {
         AlertDialog(
             onDismissRequest = { showStep1 = false },
@@ -254,7 +239,6 @@ fun WipeTestScreen(
         )
     }
 
-    // ── Étape de confirmation #2 (saisie du mot "WIPE") ─────────────────────
     if (showStep2) {
         val expected = stringResource(R.string.wipe_test_confirm2_expected)
         val match = typedConfirmation.trim() == expected
@@ -286,7 +270,7 @@ fun WipeTestScreen(
                     enabled = match,
                     onClick = {
                         showStep2 = false
-                        // ⚠️ Après cet appel, l'appareil doit être effacé.
+
                         vm.triggerWipeNow()
                     },
                 ) {

@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
+
     <string name="app_name">Oblivion V2</string>
 
-    <!-- Étape 1 : Device admin -->
     <string name="device_admin_description">Oblivion requires device admin rights to wipe the device when a duress trigger is activated.</string>
 
-    <!-- Étape 2 : Accessibility service (placeholder) -->
     <string name="accessibility_service_description">Detects the duress password on the lock screen.</string>
 
-    <!-- Common -->
     <string name="enable">Enable</string>
     <string name="disable">Disable</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
 
-    <!-- Wipe test screen (Étape 1) -->
     <string name="wipe_test_title">Wipe test</string>
     <string name="wipe_test_admin_active">Device Admin active</string>
     <string name="wipe_test_admin_active_desc">Oblivion V2 can wipe this device. The WIPE button below is live.</string>
@@ -28,9 +24,6 @@
     <string name="wipe_test_open_usb">Open USB Kill</string>
     <string name="wipe_test_open_voice">Open Voice Wipe</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 6 : Dashboard                                                 -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="dash_title">Oblivion V2</string>
     <string name="dash_subtitle">// anti-forensic system</string>
     <string name="dash_active_count">[ %1$d / %2$d ACTIVE ]</string>
@@ -83,9 +76,6 @@
     <string name="dash_decoy_on">Armed — decoy PIN triggers fake update + wipe</string>
     <string name="dash_decoy_off">Disabled</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 4 : SMS Wipe                                                  -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="sms_title">SMS Wipe</string>
 
     <string name="sms_perm_title">SMS permission</string>
@@ -117,57 +107,45 @@
     <string name="sms_sim_result_match">MATCH → wipe would trigger</string>
     <string name="sms_sim_result_no_match">No match</string>
 
-    <!-- Confirmation step 1 -->
     <string name="wipe_test_confirm1_title">Really wipe?</string>
     <string name="wipe_test_confirm1_text">This will erase everything on this phone: photos, apps, accounts, messages. There is no undo and no recovery.</string>
     <string name="wipe_test_confirm1_continue">Continue</string>
 
-    <!-- Confirmation step 2 -->
     <string name="wipe_test_confirm2_title">Last chance</string>
     <string name="wipe_test_confirm2_text">Type %1$s in the field to enable the wipe button.</string>
     <string name="wipe_test_confirm2_expected">WIPE</string>
     <string name="wipe_test_confirm2_go">WIPE NOW</string>
 
-    <!-- Diagnostic -->
     <string name="wipe_test_open_admin_settings">Open system Admin settings</string>
     <string name="wipe_test_diag_title">Diagnostic</string>
     <string name="wipe_test_diag_component">Component: %1$s</string>
     <string name="wipe_test_diag_admin_state">isAdminActive() = %1$s</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 2C : Garde-clefs (lock screen trigger configuration)         -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="guard_title">Guard (lock screen)</string>
 
-    <!-- Master -->
     <string name="guard_master_title">Guard enabled</string>
     <string name="guard_master_desc">Master switch for all lock-screen triggers below. All enabled detectors run simultaneously.</string>
     <string name="guard_accessibility_ok">Accessibility service ON</string>
     <string name="guard_accessibility_off">Accessibility service OFF — required for Guard to work.</string>
     <string name="guard_open_accessibility">Open Accessibility settings</string>
 
-    <!-- Type A : duress password -->
     <string name="guard_type_a_title">Type A — duress password</string>
     <string name="guard_type_a_desc">If this exact PIN is typed on the lock screen, the device is wiped instantly.</string>
 
-    <!-- Type B : length trap -->
     <string name="guard_type_b_title">Type B — length trap</string>
     <string name="guard_type_b_desc">If a PIN of this exact length is typed on the lock screen (any digits), the device is wiped.</string>
     <string name="guard_type_b_warning">⚠️ Make sure your real PIN is NOT this length, otherwise any valid unlock will wipe your phone.</string>
     <string name="guard_type_b_length">Trap length: %1$d digits</string>
 
-    <!-- EMERGENCY -->
     <string name="guard_emergency_title">EMERGENCY — emergency password</string>
     <string name="guard_emergency_desc">Alternate duress PIN. If typed on the lock screen, the device is wiped instantly.</string>
 
-    <!-- Failed attempts (géré nativement par Android via DPM) -->
     <string name="guard_failed_title">Failed attempts</string>
     <string name="guard_failed_desc">After this many consecutive wrong unlock attempts, the device is wiped. Handled natively by Android (the counter is managed by the system and resets on any successful unlock).</string>
     <string name="guard_failed_threshold">Threshold: %1$d wrong attempts</string>
     <string name="guard_failed_current">Current: %1$d / %2$d</string>
     <string name="guard_failed_refresh">Refresh</string>
 
-    <!-- PIN input shared -->
     <string name="guard_pin_configured">PIN configured</string>
     <string name="guard_pin_not_configured">No PIN configured</string>
     <string name="guard_pin_input_label">PIN (digits only)</string>
@@ -175,9 +153,6 @@
     <string name="guard_pin_save">Save PIN</string>
     <string name="guard_pin_clear">Clear PIN</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 3 : USB Kill                                                  -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="usb_title">USB Kill</string>
 
     <string name="usb_admin_required">Device Admin required</string>
@@ -198,7 +173,6 @@
     <string name="usb_rules_title">Rules</string>
     <string name="usb_rules_body">• Triggers only when the screen is locked.\n• Plug-in while locked → countdown starts.\n• Unplug during countdown → aborts.\n• Countdown reaches zero → wipe.</string>
 
-    <!-- Notification -->
     <string name="usb_channel_name">USB Kill</string>
     <string name="usb_channel_desc">Persistent notification while the USB Kill service is active.</string>
     <string name="usb_notif_title">Oblivion V2 — USB Kill</string>
@@ -206,9 +180,6 @@
     <string name="usb_notif_countdown">Plug-in detected — wipe in %1$d s</string>
     <string name="usb_notif_wiping">Wiping…</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 5 : Voice Wipe                                                -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="voice_title">Voice Wipe</string>
 
     <string name="voice_admin_required">Device Admin required</string>
@@ -244,7 +215,6 @@
     <string name="voice_rules_title">Rules</string>
     <string name="voice_rules_body">• The mic is only active when the screen is locked.\n• When unlocked, the mic is off (battery + privacy).\n• On phrase detection → immediate wipe.\n• Vosk runs 100 %% offline — no data leaves the device.</string>
 
-    <!-- Notification -->
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Persistent notification while the Voice Wipe service is active.</string>
     <string name="voice_notif_title">Oblivion V2 — Voice Wipe</string>
@@ -256,16 +226,12 @@
     <string name="voice_notif_perm_missing">Microphone permission missing</string>
     <string name="voice_notif_error">Recognition error — see logs</string>
 
-    <!-- Biometric gate -->
     <string name="biometric_title">Oblivion — Unlock</string>
     <string name="biometric_subtitle">Authenticate to access Oblivion</string>
     <string name="biometric_locked_title">Oblivion is locked</string>
     <string name="biometric_locked_subtitle">Authenticate with biometrics or device PIN to continue.</string>
     <string name="biometric_unlock_button">Unlock</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Dead Man\'s Switch                                                 -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="deadman_title">Dead Man\'s Switch</string>
 
     <string name="deadman_admin_required">Device Admin required</string>
@@ -292,9 +258,6 @@
     <string name="deadman_rules_title">Rules</string>
     <string name="deadman_rules_body">• The countdown resets every time you unlock the app via biometrics.\n• A periodic background task checks the deadline (every 15 min).\n• Works even when the app is closed (as long as Android has not killed the WorkManager job).\n• 100%% silent: no notification, no alert.\n• Minimum 1 hour, maximum 60 days.</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Scheduled Wipe                                                     -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="scheduled_title">Scheduled wipe</string>
 
     <string name="scheduled_admin_required">Device Admin required</string>
@@ -323,9 +286,6 @@
     <string name="scheduled_rules_title">Rules</string>
     <string name="scheduled_rules_body">• AlarmManager triggers at the chosen exact time, even in Doze.\n• Re-armed automatically after reboot.\n• 100%% silent: no notification, no pre-alert.\n• Cancelling requires biometric authentication.\n• If Device Admin is revoked between arming and firing, the wipe is dropped.</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Decoy Mode (Option A)                                              -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="decoy_title">Decoy mode</string>
 
     <string name="decoy_admin_required">Device Admin required</string>
@@ -340,7 +300,6 @@
     <string name="decoy_fsi_required_desc">On Android 14+, the fake &quot;System update&quot; screen is launched through a full-screen notification (same mechanism as incoming-call apps). This permission must be granted manually. Without it the wipe still fires, but the decoy screen will appear as a heads-up notification instead of fullscreen.</string>
     <string name="decoy_fsi_grant">Open permission settings</string>
 
-    <!-- Notification channel used for the fake update FullScreenIntent -->
     <string name="decoy_channel_name">System update</string>
     <string name="decoy_channel_desc">Silent channel used to display the fake Android system-update screen over the lockscreen when the decoy PIN is typed.</string>
 
@@ -359,7 +318,6 @@
     <string name="decoy_rules_title">Rules</string>
     <string name="decoy_rules_body">• Uses the Guard accessibility service (lockscreen monitoring).\n• Independent from the Guard master switch — works alone.\n• PIN is stored as SHA-256 + salt, never in clear.\n• On match: wipe in background + fullscreen fake &quot;System update&quot; screen.\n• The fake update UI is uncloseable; the wipe finishes under the cover.\n• Use a sequence you would never type by accident.</string>
 
-    <!-- DecoyOverlay (fake system update screen) -->
     <string name="decoy_update_title">System update</string>
     <string name="decoy_update_subtitle">Installing update…</string>
     <string name="decoy_update_note">Do not turn off your device.</string>

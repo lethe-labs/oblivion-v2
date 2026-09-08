@@ -10,27 +10,17 @@ import oblivion.v2.core.usb.UsbKillService
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Inject
 
-/**
- * ViewModel de l'écran USB Kill (Étape 3).
- *
- * Pilote la [UsbKillConfig] et démarre / arrête le [UsbKillService]
- * en conséquence.  Exige que l'admin device soit actif pour pouvoir
- * activer le trigger (sinon le wipe sera impossible).
- */
 @HiltViewModel
 class UsbKillViewModel @Inject constructor(
     app: Application,
     private val store: UsbKillConfigStore,
     private val wipeGateway: WipeGateway,
 ) : AndroidViewModel(app) {
-
     val config: StateFlow<UsbKillConfig> = store.config
 
     fun isAdminActive(): Boolean = wipeGateway.isAdminActive()
 
     fun setEnabled(enabled: Boolean) {
-        // Refuse l'activation si l'admin n'est pas actif — sinon le wipe
-        // échouera silencieusement le moment venu.
         if (enabled && !wipeGateway.isAdminActive()) return
 
         val next = config.value.copy(enabled = enabled)

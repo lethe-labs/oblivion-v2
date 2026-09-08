@@ -1,7 +1,3 @@
-// Top-level build file for Oblivion V2
-// Separate Gradle project from the original app/ module so that we can use
-// modern AGP + Kotlin + Compose without touching the working legacy build.
-
 plugins {
     id 'com.android.application' version '8.2.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.22' apply false

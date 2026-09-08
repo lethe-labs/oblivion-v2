@@ -6,15 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistance de la [UsbKillConfig] dans [SecurePrefs].
- *
- * Même pattern que [oblivion.v2.core.guard.GuardConfigStore] :
- *  - lecture synchrone au démarrage pour init rapide
- *  - [StateFlow] pour que UI et service observent les changements
- */
 class UsbKillConfigStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(loadInternal())

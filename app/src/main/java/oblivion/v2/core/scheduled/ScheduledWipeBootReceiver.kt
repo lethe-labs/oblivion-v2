@@ -9,17 +9,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import oblivion.v2.core.log.SecLog
 
-/**
- * Receiver BOOT_COMPLETED : ré-arme l'alarme programmée après un reboot.
- *
- * AlarmManager perd ses alarmes quand l'appareil redémarre ; sans ce
- * receiver le wipe programmé serait silencieusement annulé.
- *
- * Si l'échéance est déjà dans le passé au moment du boot, on déclenche
- * le wipe immédiatement (sinon on arme pour la date future).
- */
 class ScheduledWipeBootReceiver : BroadcastReceiver() {
-
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface BootEntryPoint {
@@ -46,8 +36,6 @@ class ScheduledWipeBootReceiver : BroadcastReceiver() {
 
             val now = System.currentTimeMillis()
             if (cfg.wipeAtMs <= now) {
-                // Échéance passée pendant le reboot → déclencher maintenant
-                // via le receiver principal.
                 SecLog.e(TAG, "Schedule in the past — firing now")
                 val fireIntent = Intent(context, ScheduledWipeReceiver::class.java).apply {
                     this.action = ScheduledWipeReceiver.ACTION_FIRE

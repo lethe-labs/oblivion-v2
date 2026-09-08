@@ -6,14 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 
-/**
- * ⚠️ FICHIER COPIÉ À L'IDENTIQUE depuis l'app originale qui fonctionne
- * (`me.lucky.oblivion.admin.DeviceAdminManager`).  Seul le package est
- * changé.  Aucune modification de la logique n'est autorisée ici : si le
- * wipe marche dans l'ancienne app, c'est parce que ces 3 lignes
- * `dpm?.wipeData(flags)` avec `WIPE_SILENTLY` sur Android 10+ fonctionnent
- * exactement ainsi.
- */
 class DeviceAdminManager(private val ctx: Context) {
     private val dpm = ctx.getSystemService(DevicePolicyManager::class.java)
     private val deviceAdmin by lazy { ComponentName(ctx, DeviceAdminReceiver::class.java) }

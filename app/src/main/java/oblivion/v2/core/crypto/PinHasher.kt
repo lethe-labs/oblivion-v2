@@ -1,55 +1,76 @@
 package oblivion.v2.core.crypto
 
-import android.util.Base64
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.Base64
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
-/**
- * Hashage des PINs / mots de passe de détresse.
- *
- * Threat model : l'attaquant a le téléphone déverrouillé et veut savoir
- * QUEL PIN déclenche le wipe pour l'éviter.  Pas de brute-force "offline"
- * sur un serveur parce qu'on n'est pas un serveur.  Un simple SHA-256 avec
- * un sel par-entrée suffit largement et évite les tables arc-en-ciel.
- *
- * On ne stocke JAMAIS le PIN en clair.  On compare un hash fraîchement
- * calculé au hash stocké.
- */
 object PinHasher {
+    const val PBKDF2_ITERATIONS: Int = 100_000
 
-    private const val ALGO = "SHA-256"
-    private const val SALT_BYTES = 16
+    private const val SALT_BYTES = 32
 
-    /** Génère un sel aléatoire encodé Base64 (à stocker à côté du hash). */
+    private const val PBKDF2_ALGO = "PBKDF2WithHmacSHA256"
+    private const val PBKDF2_PREFIX = "pbkdf2"
+    private const val PBKDF2_KEY_BITS = 256
+    private const val LEGACY_ALGO = "SHA-256"
+    private const val SEP = '$'
+
     fun newSalt(): String {
         val bytes = ByteArray(SALT_BYTES)
         SecureRandom().nextBytes(bytes)
-        return Base64.encodeToString(bytes, Base64.NO_WRAP)
+        return encode(bytes)
     }
 
-    /**
-     * Hashe [pin] avec [salt] (Base64).  Renvoie un hash encodé Base64
-     * NO_WRAP, sans saut de ligne.
-     */
-    fun hash(pin: String, salt: String): String {
-        val saltBytes = Base64.decode(salt, Base64.NO_WRAP)
-        val md = MessageDigest.getInstance(ALGO)
-        md.update(saltBytes)
-        val digest = md.digest(pin.toByteArray(Charsets.UTF_8))
-        return Base64.encodeToString(digest, Base64.NO_WRAP)
+    fun hash(pin: String, salt: String): String =
+        runCatching {
+            "$PBKDF2_PREFIX$SEP$PBKDF2_ITERATIONS$SEP${pbkdf2(pin, salt, PBKDF2_ITERATIONS)}"
+        }.getOrElse { legacyHash(pin, salt) }
+
+    fun legacyHash(pin: String, salt: String): String {
+        val md = MessageDigest.getInstance(LEGACY_ALGO)
+        md.update(decode(salt))
+        return encode(md.digest(pin.toByteArray(Charsets.UTF_8)))
     }
 
-    /**
-     * Comparaison en temps constant pour éviter un timing attack local
-     * (paranoïa mais trivial à faire).
-     */
     fun verify(pin: String, expectedHash: String, salt: String): Boolean {
-        val actual = hash(pin, salt)
-        if (actual.length != expectedHash.length) return false
+        if (pin.isEmpty() || expectedHash.isEmpty() || salt.isEmpty()) return false
+        return runCatching {
+            val parts = expectedHash.split(SEP)
+            if (parts.size == 3 && parts[0] == PBKDF2_PREFIX) {
+                val iterations = parts[1].toIntOrNull() ?: return@runCatching false
+                if (iterations <= 0) return@runCatching false
+                constantTimeEquals(pbkdf2(pin, salt, iterations), parts[2])
+            } else {
+                constantTimeEquals(legacyHash(pin, salt), expectedHash)
+            }
+        }.getOrDefault(false)
+    }
+
+    fun isLegacyFormat(storedHash: String): Boolean =
+        storedHash.isNotEmpty() && !storedHash.startsWith("$PBKDF2_PREFIX$SEP")
+
+    private fun pbkdf2(pin: String, salt: String, iterations: Int): String {
+        val spec = PBEKeySpec(pin.toCharArray(), decode(salt), iterations, PBKDF2_KEY_BITS)
+        try {
+            val factory = SecretKeyFactory.getInstance(PBKDF2_ALGO)
+            return encode(factory.generateSecret(spec).encoded)
+        } finally {
+            spec.clearPassword()
+        }
+    }
+
+    private fun constantTimeEquals(a: String, b: String): Boolean {
+        if (a.length != b.length) return false
         var diff = 0
-        for (i in actual.indices) {
-            diff = diff or (actual[i].code xor expectedHash[i].code)
+        for (i in a.indices) {
+            diff = diff or (a[i].code xor b[i].code)
         }
         return diff == 0
     }
+
+    private fun encode(bytes: ByteArray): String = Base64.getEncoder().encodeToString(bytes)
+
+    private fun decode(value: String): ByteArray = Base64.getDecoder().decode(value)
 }

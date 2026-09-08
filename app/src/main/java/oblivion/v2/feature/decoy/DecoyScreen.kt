@@ -48,15 +48,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import oblivion.v2.R
 import oblivion.v2.core.decoy.DecoyConfig
 
-/**
- * Écran de configuration du Mode Decoy (leurre).
- *
- * 4 sections :
- *  1. Admin required — avertissement si admin device pas actif
- *  2. Master toggle — active / désactive le mode
- *  3. PIN leurre — saisie / effacement
- *  4. Règles — explication de fonctionnement
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DecoyScreen(
@@ -68,9 +59,6 @@ fun DecoyScreen(
     val fsiOk = vm.hasFullScreenIntentPermission()
     val context = LocalContext.current
 
-    // Suivi runtime de POST_NOTIFICATIONS (Android 13+). Sans cette permission,
-    // même si la permission FullScreenIntent est accordée, le système ne
-    // postera rien — donc pas d'écran leurre.
     val needsNotifPerm = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     var hasNotifPerm by remember {
         mutableStateOf(
@@ -135,8 +123,7 @@ fun DecoyScreen(
                 enabled = config.enabled,
                 canToggle = adminActive && config.isConfigured(),
                 onToggle = { turnOn ->
-                    // À l'activation, on demande la perm notif si besoin.  Si
-                    // l'utilisateur l'accepte, le prochain toggle fonctionnera.
+
                     if (turnOn && needsNotifPerm && !hasNotifPerm) {
                         notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }

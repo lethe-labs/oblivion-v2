@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App -->
+
     <string name="app_name">Oblivion V2</string>
 
-    <!-- Étape 1 : Device admin -->
     <string name="device_admin_description">Oblivion a besoin des droits d\'administrateur pour effacer l\'appareil quand un déclencheur de détresse est activé.</string>
 
-    <!-- Étape 2 : Accessibility service (placeholder) -->
     <string name="accessibility_service_description">Détecte le mot de passe de détresse sur l\'écran de verrouillage.</string>
 
-    <!-- Commun -->
     <string name="enable">Activer</string>
     <string name="disable">Désactiver</string>
     <string name="save">Enregistrer</string>
     <string name="cancel">Annuler</string>
 
-    <!-- Écran de test du wipe (Étape 1) -->
     <string name="wipe_test_title">Test du wipe</string>
     <string name="wipe_test_admin_active">Admin appareil actif</string>
     <string name="wipe_test_admin_active_desc">Oblivion V2 peut effacer cet appareil. Le bouton ci-dessous est opérationnel.</string>
@@ -28,9 +24,6 @@
     <string name="wipe_test_open_usb">Ouvrir USB Kill</string>
     <string name="wipe_test_open_voice">Ouvrir Voice Wipe</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 6 : Dashboard                                                 -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="dash_title">Oblivion V2</string>
     <string name="dash_subtitle">// système anti-forensique</string>
     <string name="dash_active_count">[ %1$d / %2$d ACTIFS ]</string>
@@ -83,9 +76,6 @@
     <string name="dash_decoy_on">Armé — le PIN leurre déclenche une fausse MAJ + wipe</string>
     <string name="dash_decoy_off">Désactivé</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 4 : SMS Wipe                                                  -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="sms_title">SMS Wipe</string>
 
     <string name="sms_perm_title">Permission SMS</string>
@@ -117,57 +107,45 @@
     <string name="sms_sim_result_match">MATCH → le wipe se déclencherait</string>
     <string name="sms_sim_result_no_match">Pas de correspondance</string>
 
-    <!-- Confirmation étape 1 -->
     <string name="wipe_test_confirm1_title">Vraiment effacer ?</string>
     <string name="wipe_test_confirm1_text">Cela effacera tout ce qu\'il y a sur ce téléphone : photos, applis, comptes, messages. Aucun retour en arrière, aucune récupération possible.</string>
     <string name="wipe_test_confirm1_continue">Continuer</string>
 
-    <!-- Confirmation étape 2 -->
     <string name="wipe_test_confirm2_title">Dernière chance</string>
     <string name="wipe_test_confirm2_text">Tape %1$s dans le champ pour activer le bouton d\'effacement.</string>
     <string name="wipe_test_confirm2_expected">WIPE</string>
     <string name="wipe_test_confirm2_go">EFFACER MAINTENANT</string>
 
-    <!-- Diagnostic -->
     <string name="wipe_test_open_admin_settings">Ouvrir les paramètres Admin système</string>
     <string name="wipe_test_diag_title">Diagnostic</string>
     <string name="wipe_test_diag_component">Composant : %1$s</string>
     <string name="wipe_test_diag_admin_state">isAdminActive() = %1$s</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 2C : Garde-clefs (configuration des déclencheurs lockscreen) -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="guard_title">Garde-clefs (écran verrouillé)</string>
 
-    <!-- Master -->
     <string name="guard_master_title">Garde-clefs activé</string>
     <string name="guard_master_desc">Interrupteur maître pour tous les déclencheurs ci-dessous. Tous les détecteurs activés fonctionnent simultanément.</string>
     <string name="guard_accessibility_ok">Service d\'accessibilité ACTIF</string>
     <string name="guard_accessibility_off">Service d\'accessibilité INACTIF — requis pour que le Garde-clefs fonctionne.</string>
     <string name="guard_open_accessibility">Ouvrir les paramètres d\'accessibilité</string>
 
-    <!-- Type A : mot de passe de détresse -->
     <string name="guard_type_a_title">Type A — mot de passe de détresse</string>
     <string name="guard_type_a_desc">Si ce PIN exact est saisi sur l\'écran de verrouillage, l\'appareil est effacé immédiatement.</string>
 
-    <!-- Type B : longueur-piège -->
     <string name="guard_type_b_title">Type B — longueur-piège</string>
     <string name="guard_type_b_desc">Si un PIN de cette longueur exacte est saisi sur l\'écran de verrouillage (n\'importe quels chiffres), l\'appareil est effacé.</string>
     <string name="guard_type_b_warning">⚠️ Assure-toi que ton vrai PIN n\'a PAS cette longueur, sinon n\'importe quel déverrouillage valide effacera ton téléphone.</string>
     <string name="guard_type_b_length">Longueur du piège : %1$d chiffres</string>
 
-    <!-- EMERGENCY -->
     <string name="guard_emergency_title">EMERGENCY — mot de passe d\'urgence</string>
     <string name="guard_emergency_desc">PIN de détresse alternatif. S\'il est saisi sur l\'écran de verrouillage, l\'appareil est effacé immédiatement.</string>
 
-    <!-- Tentatives échouées (géré nativement par Android via DPM) -->
     <string name="guard_failed_title">Tentatives échouées</string>
     <string name="guard_failed_desc">Après ce nombre de tentatives de déverrouillage incorrectes consécutives, l\'appareil est effacé. Géré nativement par Android (le compteur est maintenu par le système et revient à zéro à chaque déverrouillage réussi).</string>
     <string name="guard_failed_threshold">Seuil : %1$d tentatives erronées</string>
     <string name="guard_failed_current">Actuel : %1$d / %2$d</string>
     <string name="guard_failed_refresh">Actualiser</string>
 
-    <!-- Saisie du PIN (partagé) -->
     <string name="guard_pin_configured">PIN configuré</string>
     <string name="guard_pin_not_configured">Aucun PIN configuré</string>
     <string name="guard_pin_input_label">PIN (chiffres uniquement)</string>
@@ -175,9 +153,6 @@
     <string name="guard_pin_save">Enregistrer le PIN</string>
     <string name="guard_pin_clear">Effacer le PIN</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 3 : USB Kill                                                  -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="usb_title">USB Kill</string>
 
     <string name="usb_admin_required">Admin appareil requis</string>
@@ -198,7 +173,6 @@
     <string name="usb_rules_title">Règles</string>
     <string name="usb_rules_body">• Se déclenche uniquement quand l\'écran est verrouillé.\n• Branchement sur écran verrouillé → démarre le compte à rebours.\n• Débranchement pendant le compte à rebours → annule.\n• Compte à rebours à zéro → wipe.</string>
 
-    <!-- Notification -->
     <string name="usb_channel_name">USB Kill</string>
     <string name="usb_channel_desc">Notification persistante pendant que le service USB Kill est actif.</string>
     <string name="usb_notif_title">Oblivion V2 — USB Kill</string>
@@ -206,9 +180,6 @@
     <string name="usb_notif_countdown">Branchement détecté — wipe dans %1$d s</string>
     <string name="usb_notif_wiping">Effacement en cours…</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Étape 5 : Voice Wipe                                                -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="voice_title">Voice Wipe</string>
 
     <string name="voice_admin_required">Admin appareil requis</string>
@@ -244,7 +215,6 @@
     <string name="voice_rules_title">Règles</string>
     <string name="voice_rules_body">• Le micro n\'est actif que quand l\'écran est verrouillé.\n• Quand l\'écran est déverrouillé, le micro est coupé (batterie + vie privée).\n• Détection de la phrase → effacement immédiat.\n• Vosk tourne 100 %% hors-ligne — aucune donnée ne quitte l\'appareil.</string>
 
-    <!-- Notification -->
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Notification persistante pendant que le service Voice Wipe est actif.</string>
     <string name="voice_notif_title">Oblivion V2 — Voice Wipe</string>
@@ -256,16 +226,12 @@
     <string name="voice_notif_perm_missing">Permission micro manquante</string>
     <string name="voice_notif_error">Erreur de reconnaissance — voir les logs</string>
 
-    <!-- Biometric gate -->
     <string name="biometric_title">Oblivion — Déverrouiller</string>
     <string name="biometric_subtitle">Authentifiez-vous pour accéder à Oblivion</string>
     <string name="biometric_locked_title">Oblivion est verrouillé</string>
     <string name="biometric_locked_subtitle">Authentifiez-vous avec votre biométrie ou le code de l\'appareil pour continuer.</string>
     <string name="biometric_unlock_button">Déverrouiller</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Dead Man\'s Switch                                                 -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="deadman_title">Dead Man\'s Switch</string>
 
     <string name="deadman_admin_required">Admin appareil requis</string>
@@ -292,9 +258,6 @@
     <string name="deadman_rules_title">Règles</string>
     <string name="deadman_rules_body">• Le compte à rebours se réinitialise à chaque déverrouillage de l\'app via biométrie.\n• Une tâche de fond périodique vérifie l\'échéance (toutes les 15 min).\n• Fonctionne même app fermée (tant qu\'Android n\'a pas tué le job WorkManager).\n• 100%% silencieux : aucune notification, aucune alerte.\n• Minimum 1 heure, maximum 60 jours.</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Wipe programmé                                                     -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="scheduled_title">Wipe programmé</string>
 
     <string name="scheduled_admin_required">Admin appareil requis</string>
@@ -323,9 +286,6 @@
     <string name="scheduled_rules_title">Règles</string>
     <string name="scheduled_rules_body">• AlarmManager se déclenche à l\'heure exacte, même en mode Doze.\n• Ré-armé automatiquement après un reboot.\n• 100%% silencieux : aucune notification, aucune pré-alerte.\n• L\'annulation exige une authentification biométrique.\n• Si l\'admin appareil est révoqué entre l\'armement et le déclenchement, le wipe est annulé.</string>
 
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- Mode leurre (Decoy, Option A)                                       -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
     <string name="decoy_title">Mode leurre</string>
 
     <string name="decoy_admin_required">Admin appareil requis</string>
@@ -340,7 +300,6 @@
     <string name="decoy_fsi_required_desc">Sur Android 14+, la fausse page &quot;Mise à jour système&quot; est lancée via une notification plein écran (même mécanisme que les apps d\'appels entrants). Cette permission doit être accordée manuellement. Sans elle, le wipe se déclenche quand même, mais la fausse page apparaîtra en tant que heads-up notification au lieu du plein écran.</string>
     <string name="decoy_fsi_grant">Ouvrir les paramètres</string>
 
-    <!-- Canal de notification utilisé pour le FullScreenIntent de la fausse MAJ -->
     <string name="decoy_channel_name">Mise à jour système</string>
     <string name="decoy_channel_desc">Canal silencieux utilisé pour afficher la fausse page Android de mise à jour système par-dessus le lockscreen quand le PIN leurre est tapé.</string>
 
@@ -359,7 +318,6 @@
     <string name="decoy_rules_title">Règles</string>
     <string name="decoy_rules_body">• Utilise le service d\'accessibilité du Garde-clefs (surveillance lockscreen).\n• Indépendant du master switch du Garde-clefs — fonctionne seul.\n• PIN stocké en SHA-256 + sel, jamais en clair.\n• Au match : wipe en arrière-plan + fausse page &quot;Mise à jour système&quot; plein écran.\n• La fausse page ne se ferme pas ; le wipe se termine pendant ce temps.\n• Utilise une séquence que tu ne taperais jamais par accident.</string>
 
-    <!-- DecoyOverlay (fausse page mise à jour système) -->
     <string name="decoy_update_title">Mise à jour système</string>
     <string name="decoy_update_subtitle">Installation en cours…</string>
     <string name="decoy_update_note">N\'éteignez pas votre appareil.</string>

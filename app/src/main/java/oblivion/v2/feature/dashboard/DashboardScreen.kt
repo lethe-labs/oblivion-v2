@@ -81,9 +81,6 @@ import oblivion.v2.ui.theme.OblivionRed
 import oblivion.v2.ui.theme.OblivionRedDark
 import oblivion.v2.ui.theme.OblivionRedLight
 
-/**
- * Dashboard principal — style dark / hacking.
- */
 @Composable
 fun DashboardScreen(
     onOpenGuard: () -> Unit,
@@ -117,7 +114,6 @@ fun DashboardScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // Count active triggers
     val activeCount = listOf(
         guardCfg.masterEnabled,
         usbCfg.enabled,
@@ -141,26 +137,21 @@ fun DashboardScreen(
                 .padding(top = 48.dp, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
-            // ── Header : Logo + Title ──────────────────────────────────
             HeaderSection(activeCount = activeCount, totalCount = totalCount)
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Admin Status ───────────────────────────────────────────
             AdminBanner(
                 active = adminActive,
                 onActivate = { ctx.startActivity(vm.requestAdminIntent()) },
             )
 
-            // ── System warnings ─────────────────────────────────────────
             if (!showPasswordOk) {
                 Spacer(Modifier.height(10.dp))
                 SystemWarningBanner(
                     message = stringResource(R.string.dash_warn_show_password),
                     buttonLabel = stringResource(R.string.dash_warn_open_settings),
                     onClick = {
-                        // Ouvre directement Paramètres > Sécurité (le plus proche)
                         ctx.startActivity(
                             Intent(Settings.ACTION_SECURITY_SETTINGS).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -186,12 +177,10 @@ fun DashboardScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // ── Section title ──────────────────────────────────────────
             SectionHeader(text = stringResource(R.string.dash_section_triggers))
 
             Spacer(Modifier.height(12.dp))
 
-            // ── Trigger Cards ──────────────────────────────────────────
             TriggerCard(
                 icon = Icons.Filled.Lock,
                 title = stringResource(R.string.dash_guard_title),
@@ -295,7 +284,6 @@ fun DashboardScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ── Wipe Test button ───────────────────────────────────────
             TextButton(
                 onClick = onOpenWipeTest,
                 modifier = Modifier.fillMaxWidth(),
@@ -316,10 +304,6 @@ fun DashboardScreen(
         }
     }
 }
-
-// ════════════════════════════════════════════════════════════════════
-// Header with animated pulse ring + app title
-// ════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun HeaderSection(activeCount: Int, totalCount: Int) {
@@ -344,12 +328,10 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
     )
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        // Logo with animated pulse rings
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(140.dp),
         ) {
-            // Pulsing outer rings
             Canvas(modifier = Modifier.size(140.dp)) {
                 val center = Offset(size.width / 2, size.height / 2)
                 val radius = (size.minDimension / 2) * pulseRadius
@@ -366,7 +348,7 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
                     style = Stroke(width = 1.dp.toPx()),
                 )
             }
-            // Logo image
+
             Image(
                 painter = painterResource(R.drawable.ic_oblivion_logo),
                 contentDescription = "Oblivion",
@@ -379,7 +361,6 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
 
         Spacer(Modifier.height(16.dp))
 
-        // App name
         Text(
             text = "OBLIVION",
             style = MaterialTheme.typography.headlineLarge,
@@ -391,7 +372,6 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
 
         Spacer(Modifier.height(4.dp))
 
-        // Subtitle + trigger count
         Text(
             text = stringResource(R.string.dash_subtitle),
             style = MaterialTheme.typography.bodySmall,
@@ -402,7 +382,6 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
 
         Spacer(Modifier.height(6.dp))
 
-        // Active triggers count
         Text(
             text = stringResource(R.string.dash_active_count, activeCount, totalCount),
             style = MaterialTheme.typography.labelMedium,
@@ -413,10 +392,6 @@ private fun HeaderSection(activeCount: Int, totalCount: Int) {
         )
     }
 }
-
-// ════════════════════════════════════════════════════════════════════
-// Admin banner — compact, with glowing border when active
-// ════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun AdminBanner(active: Boolean, onActivate: () -> Unit) {
@@ -433,7 +408,6 @@ private fun AdminBanner(active: Boolean, onActivate: () -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Status dot
             Box(
                 modifier = Modifier
                     .size(10.dp)
@@ -485,10 +459,6 @@ private fun AdminBanner(active: Boolean, onActivate: () -> Unit) {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// Section header with line accent
-// ════════════════════════════════════════════════════════════════════
-
 @Composable
 private fun SectionHeader(text: String) {
     Row(
@@ -519,10 +489,6 @@ private fun SectionHeader(text: String) {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// Trigger card — dark panel with left accent bar
-// ════════════════════════════════════════════════════════════════════
-
 @Composable
 private fun TriggerCard(
     icon: ImageVector,
@@ -543,7 +509,6 @@ private fun TriggerCard(
         onClick = onClick,
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            // Left accent bar
             Box(
                 modifier = Modifier
                     .width(4.dp)
@@ -592,10 +557,6 @@ private fun TriggerCard(
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// Status chip — glowing ON or muted OFF
-// ════════════════════════════════════════════════════════════════════
-
 @Composable
 private fun StatusChip(enabled: Boolean) {
     val bgColor = if (enabled) OblivionRed.copy(alpha = 0.15f) else Color(0xFF222222)
@@ -613,7 +574,6 @@ private fun StatusChip(enabled: Boolean) {
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (enabled) {
-                // Tiny glowing dot
                 Box(
                     modifier = Modifier
                         .size(6.dp)
@@ -635,17 +595,13 @@ private fun StatusChip(enabled: Boolean) {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
-// System warning banner — amber/orange accent for attention
-// ════════════════════════════════════════════════════════════════════
-
 @Composable
 private fun SystemWarningBanner(
     message: String,
     buttonLabel: String,
     onClick: () -> Unit,
 ) {
-    val warningColor = Color(0xFFFF9800) // Orange amber
+    val warningColor = Color(0xFFFF9800)
 
     Card(
         modifier = Modifier.fillMaxWidth(),

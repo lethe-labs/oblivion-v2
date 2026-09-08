@@ -32,22 +32,8 @@ import oblivion.v2.R
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Inject
 
-/**
- * Service Voice Wipe — Étape 5.
- *
- * Règles :
- *  1. écoute active UNIQUEMENT lorsque l'écran est verrouillé (choix user)
- *  2. écran déverrouillé → micro coupé (batterie + vie privée)
- *  3. phrase-clé prononcée avec seuil strict → wipe immédiat
- *
- * Le service tourne en foreground avec notification persistante —
- * obligatoire pour ouvrir le micro en arrière-plan sur Android 14.
- * Le type de foreground service est [FOREGROUND_SERVICE_TYPE_MICROPHONE]
- * comme requis depuis Android 10.
- */
 @AndroidEntryPoint
 class VoiceKillService : Service() {
-
     @Inject lateinit var configStore: VoiceKillConfigStore
     @Inject lateinit var wipeGateway: WipeGateway
 
@@ -55,7 +41,7 @@ class VoiceKillService : Service() {
     private val recognizer by lazy { VoiceRecognizer(applicationContext) }
     private var unpackJob: Job? = null
     private var modelPath: String? = null
-    /** Langue du modèle actuellement extrait (pour détecter un changement). */
+
     private var unpackedLanguage: String? = null
 
     private val screenReceiver = object : BroadcastReceiver() {
@@ -64,10 +50,6 @@ class VoiceKillService : Service() {
                 Intent.ACTION_SCREEN_OFF -> onScreenLocked()
                 Intent.ACTION_USER_PRESENT -> onUserPresent()
                 Intent.ACTION_SCREEN_ON -> {
-                    // Pas utilisé : on ne veut agir qu'au verrouillage réel.
-                    // Android envoie SCREEN_ON même sur un écran qui reste
-                    // verrouillé — on se base plutôt sur SCREEN_OFF +
-                    // isDeviceLocked() pour décider.
                 }
             }
         }
@@ -90,11 +72,8 @@ class VoiceKillService : Service() {
             ContextCompat.RECEIVER_NOT_EXPORTED,
         )
 
-        // Déclenche unpack en arrière-plan dès le démarrage du service.
         unpackModelAsync(configStore.load().language)
 
-        // Stoppe le service si l'utilisateur désactive le trigger.
-        // Si la langue change pendant que le service tourne, on re-unpack.
         configStore.config
             .onEach { cfg ->
                 if (!cfg.enabled) {
@@ -111,8 +90,6 @@ class VoiceKillService : Service() {
             }
             .launchIn(scope)
 
-        // Si le téléphone est déjà verrouillé au démarrage du service
-        // (activation depuis l'UI puis écran éteint), on démarre direct.
         if (isDeviceLocked()) {
             SecLog.d(TAG, "device already locked on service create")
         }
@@ -133,12 +110,9 @@ class VoiceKillService : Service() {
         super.onDestroy()
     }
 
-    // ── Events ──────────────────────────────────────────────────────────────
-
     private fun onScreenLocked() {
         SecLog.d(TAG, "screen off → will start listening if ready")
-        // Attendre un court instant : sur certains OEM SCREEN_OFF précède
-        // le verrouillage effectif.
+
         scope.launch {
             kotlinx.coroutines.delay(SCREEN_OFF_DELAY_MS)
             if (isDeviceLocked()) {
@@ -154,8 +128,6 @@ class VoiceKillService : Service() {
         stopRecognition()
     }
 
-    // ── Recognizer lifecycle ────────────────────────────────────────────────
-
     private fun unpackModelAsync(language: String) {
         unpackJob?.cancel()
         unpackJob = scope.launch {
@@ -168,8 +140,7 @@ class VoiceKillService : Service() {
                 unpackedLanguage = language
                 SecLog.d(TAG, "model[$language] ready at $path")
                 updateNotification(State.Idle)
-                // Si l'écran est déjà verrouillé au moment où le modèle
-                // devient prêt, démarrer l'écoute tout de suite.
+
                 if (isDeviceLocked()) startRecognition()
             } catch (t: Throwable) {
                 SecLog.e(TAG, "unpack failed for language='$language': ${t.message}", t)
@@ -231,8 +202,6 @@ class VoiceKillService : Service() {
         SecLog.d(TAG, "wipeNow() result=$result")
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
-
     private fun isDeviceLocked(): Boolean {
         val km = getSystemService(KEYGUARD_SERVICE) as? KeyguardManager ?: return false
         return km.isDeviceLocked || km.isKeyguardLocked
@@ -255,8 +224,6 @@ class VoiceKillService : Service() {
             startForeground(NOTIFICATION_ID, notification)
         }
     }
-
-    // ── Notification ────────────────────────────────────────────────────────
 
     private enum class State { UnpackingModel, Idle, Listening, Wiping, ModelMissing, PermMissing, Error }
 
@@ -297,7 +264,7 @@ class VoiceKillService : Service() {
     companion object {
         private const val TAG = "VoiceKillService"
         private const val NOTIFICATION_ID = 4202
-        /** Délai avant vérification du verrouillage après SCREEN_OFF. */
+
         private const val SCREEN_OFF_DELAY_MS = 500L
 
         fun start(context: Context) {

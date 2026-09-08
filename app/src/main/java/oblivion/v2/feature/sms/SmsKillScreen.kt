@@ -69,15 +69,13 @@ fun SmsKillScreen(
     var senderInput by remember(cfg.senderNumber) { mutableStateOf(cfg.senderNumber) }
     var keywordInput by remember(cfg.keyword) { mutableStateOf(cfg.keyword) }
 
-    // Simulation test state
     var simSender by remember { mutableStateOf("") }
     var simBody by remember { mutableStateOf("") }
     var simResult by remember { mutableStateOf<Boolean?>(null) }
 
-    // Permission launcher for RECEIVE_SMS
     val smsPermLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* No-op — on vérifie juste l'état */ }
+    ) {  }
 
     val hasSmsPermission = ContextCompat.checkSelfPermission(
         ctx, Manifest.permission.RECEIVE_SMS
@@ -103,8 +101,6 @@ fun SmsKillScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
-            // ── Permission RECEIVE_SMS ─────────────────────────────
             if (!hasSmsPermission) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -133,7 +129,6 @@ fun SmsKillScreen(
                 }
             }
 
-            // ── Sender number ──────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -174,7 +169,6 @@ fun SmsKillScreen(
                 }
             }
 
-            // ── Keyword ────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -225,7 +219,6 @@ fun SmsKillScreen(
                 }
             }
 
-            // ── Master toggle ──────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -256,7 +249,6 @@ fun SmsKillScreen(
                 }
             }
 
-            // ── Rules ──────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -277,7 +269,6 @@ fun SmsKillScreen(
                 }
             }
 
-            // ── Simulation test (debug only) ───────────────────────
             if (BuildConfig.DEBUG) {
                 Spacer(Modifier.height(8.dp))
                 Card(

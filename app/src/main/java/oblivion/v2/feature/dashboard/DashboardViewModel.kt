@@ -24,12 +24,6 @@ import oblivion.v2.core.voice.VoiceKillConfigStore
 import oblivion.v2.core.wipe.WipeGateway
 import javax.inject.Inject
 
-/**
- * ViewModel du Dashboard.
- *
- * Agrège les [StateFlow] de chaque trigger + l'état Device Admin +
- * les checks système (afficher mots de passe, confidentialité PIN).
- */
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     app: Application,
@@ -43,7 +37,6 @@ class DashboardViewModel @Inject constructor(
     scheduledStore: ScheduledWipeStore,
     decoyStore: DecoyConfigStore,
 ) : AndroidViewModel(app) {
-
     val guardConfig: StateFlow<GuardConfig> = guardStore.config
     val usbConfig: StateFlow<UsbKillConfig> = usbStore.config
     val voiceConfig: StateFlow<VoiceKillConfig> = voiceStore.config
@@ -61,7 +54,6 @@ class DashboardViewModel @Inject constructor(
     private val _pinPrivacyOk = MutableStateFlow(systemCheck.isEnhancedPinPrivacyDisabled())
     val pinPrivacyOk: StateFlow<Boolean> = _pinPrivacyOk.asStateFlow()
 
-    /** Rafraîchit tous les états — appelé quand l'utilisateur revient sur le Dashboard. */
     fun refreshAdminState() {
         _adminActive.value = wipeGateway.isAdminActive()
         _showPasswordOk.value = systemCheck.isShowPasswordEnabled()

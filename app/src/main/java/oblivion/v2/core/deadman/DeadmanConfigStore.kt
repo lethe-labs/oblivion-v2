@@ -7,14 +7,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.log.SecLog
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistence chiffrée de [DeadmanConfig] via EncryptedSharedPreferences.
- *
- * Expose aussi un [StateFlow] pour que l'UI et le Worker observent les
- * changements en temps réel.
- */
 class DeadmanConfigStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(load())
@@ -30,7 +23,7 @@ class DeadmanConfigStore(private val securePrefs: SecurePrefs) {
         try {
             prefs.edit {
                 putBoolean(KEY_ENABLED, value)
-                // Reset le check-in quand on active pour partir d'un état propre.
+
                 if (value) {
                     putLong(KEY_LAST_CHECKIN_MS, System.currentTimeMillis())
                 }
@@ -54,10 +47,6 @@ class DeadmanConfigStore(private val securePrefs: SecurePrefs) {
         }
     }
 
-    /**
-     * Enregistre un check-in maintenant. Appelé par [BiometricAuthState]
-     * à chaque authentification biométrique réussie.
-     */
     fun touchCheckIn() {
         try {
             prefs.edit { putLong(KEY_LAST_CHECKIN_MS, System.currentTimeMillis()) }

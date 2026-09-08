@@ -45,13 +45,6 @@ import oblivion.v2.core.auth.BiometricAuthenticator
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
-/**
- * Écran de configuration du Wipe Programmé.
- *
- * - Deux DatePicker/TimePicker natifs pour choisir date + heure.
- * - Bouton "Armer" : enregistre et programme l'alarme (silencieusement).
- * - Bouton "Désarmer" : exige une auth biométrique avant de pouvoir annuler.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduledWipeScreen(
@@ -63,7 +56,6 @@ fun ScheduledWipeScreen(
     val ctx = LocalContext.current
     val canExact = vm.canScheduleExactAlarms()
 
-    // Sélection locale (défaut : dans 24 h).
     var selectedMs by remember {
         mutableStateOf(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(24))
     }
@@ -111,14 +103,13 @@ fun ScheduledWipeScreen(
                 ArmedCard(
                     wipeAtMs = config.wipeAtMs,
                     onDisarm = {
-                        // Annulation protégée par biométrie.
                         val activity = ctx as? FragmentActivity ?: return@ArmedCard
                         BiometricAuthenticator.authenticate(
                             activity = activity,
                             title = ctx.getString(R.string.scheduled_disarm_prompt_title),
                             subtitle = ctx.getString(R.string.scheduled_disarm_prompt_subtitle),
                             onSuccess = { vm.disarmAfterAuth() },
-                            onFailure = { _, _ -> /* silencieux */ },
+                            onFailure = { _, _ ->  },
                         )
                     },
                 )
@@ -333,8 +324,6 @@ private fun RulesCard() {
         }
     }
 }
-
-// ── Formatage ─────────────────────────────────────────────────────────
 
 private fun formatAbsolute(ms: Long): String {
     val fmt = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())

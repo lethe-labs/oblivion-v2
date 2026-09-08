@@ -7,7 +7,7 @@
 **Anti-forensic duress-wipe system for Android**
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-red.svg)](LICENSE)
-[![Android: 10+](https://img.shields.io/badge/Android-10%20→%2014+-green.svg)]()
+[![Android: 8.0+](https://img.shields.io/badge/Android-8.0%20→%2014+-green.svg)]()
 [![Offline](https://img.shields.io/badge/100%25-offline-blue.svg)]()
 [![Telemetry: 0](https://img.shields.io/badge/Telemetry-0-black.svg)]()
 
@@ -66,7 +66,7 @@ is technically incapable of network communication.
 |---|---|
 | Encryption | AES-256-GCM via `EncryptedSharedPreferences` |
 | Master key | Hardware-backed Android Keystore |
-| PIN hash | SHA-256 + 32-byte random salt |
+| PIN hash | PBKDF2-HMAC-SHA256, 100 000 iterations + 32-byte random salt |
 | PIN comparison | Timing-safe (side-channel resistant) |
 | Wipe mechanism | `DevicePolicyManager.wipeData()` (native Device Admin) |
 | Voice recognition | Vosk (offline, FR + EN small models bundled) |
@@ -99,12 +99,18 @@ is technically incapable of network communication.
 ### Build commands
 
 ```bash
-git clone https://github.com/lethe-labs/oblivion.git
-cd oblivion
+git clone https://github.com/lethe-labs/oblivion-v2.git
+cd oblivion-v2
 ./gradlew assembleRelease
 ```
 
 Output APK: `app/build/outputs/apk/release/app-release.apk`
+
+Unit tests (pure JVM, no device required):
+
+```bash
+./gradlew testDebugUnitTest
+```
 
 ### Signing your own release build
 
@@ -121,18 +127,18 @@ This file is in `.gitignore` and **must never be committed**.
 
 ### Vosk voice models
 
-The repository ships with the **French small model** (~40 MB) in
-`app/src/main/assets/model-fr/`. The English model directory exists but is
-empty — you must add the model yourself to enable English voice recognition.
+The repository ships with both the **French** and the **English small models**
+in `app/src/main/assets/model-fr/` and `app/src/main/assets/model-en/`
+(~65 MB each). Nothing to download for a standard build.
 
-Download from <https://alphacephei.com/vosk/models>:
+To replace a model with a different one, download it from
+<https://alphacephei.com/vosk/models>:
 
 - **FR**: `vosk-model-small-fr-pguyot`
 - **EN**: `vosk-model-small-en-us-0.15`
 
 Extract the ZIP and copy its contents into `app/src/main/assets/model-<lang>/`,
-matching the structure of the existing FR model (see
-`app/src/main/assets/model-en/README.md` for details).
+matching the structure of the models already present.
 
 Both models are released under **Apache 2.0** — commercial use is permitted.
 
@@ -170,6 +176,19 @@ constraints. The following limitations are known and documented:
   common. Choose 3–5 unusual words together. False-positive risk is real.
 - **WorkManager periodic minimum is 15 minutes.** The Dead Man's Switch
   checks every 15 minutes; expect up to that delay between expiry and wipe.
+- **SMS sender identity can be spoofed.** Caller ID on an inbound SMS is not
+  authenticated by the network and can be forged through commercial gateways.
+  Anyone who learns your keyword can therefore fire the SMS trigger remotely.
+  No receiver-side check can prevent this: treat the keyword as a secret of
+  the same value as the duress PIN, and disable the SMS trigger if remote
+  wipe is not worth that risk. Configuring the authorised number in full
+  international form (`+33…`) is stricter than the national form.
+- **Choose a duress PIN that is not a suffix of your real PIN.** The
+  lockscreen triggers fire as soon as the last digits you typed match the
+  duress secret — that is what lets them work without pressing "validate",
+  and what lets them still work after a mistyped attempt. As a consequence a
+  real PIN of `981234` would trigger a duress PIN of `1234` on every normal
+  unlock.
 
 ---
 

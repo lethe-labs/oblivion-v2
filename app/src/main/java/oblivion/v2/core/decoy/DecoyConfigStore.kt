@@ -8,14 +8,7 @@ import oblivion.v2.core.crypto.PinHasher
 import oblivion.v2.core.log.SecLog
 import oblivion.v2.core.prefs.SecurePrefs
 
-/**
- * Persistence chiffrée de [DecoyConfig] via EncryptedSharedPreferences.
- *
- * Expose un [StateFlow] pour que l'UI et le [GuardAccessibilityService]
- * observent les changements en temps réel.
- */
 class DecoyConfigStore(private val securePrefs: SecurePrefs) {
-
     private val prefs get() = securePrefs.prefs
 
     private val _config = MutableStateFlow(load())
@@ -25,6 +18,7 @@ class DecoyConfigStore(private val securePrefs: SecurePrefs) {
         enabled = prefs.getBoolean(KEY_ENABLED, false),
         pinHash = prefs.getString(KEY_HASH, "").orEmpty(),
         pinSalt = prefs.getString(KEY_SALT, "").orEmpty(),
+        pinLength = prefs.getInt(KEY_LENGTH, 0),
     )
 
     fun save(config: DecoyConfig) {
@@ -33,6 +27,7 @@ class DecoyConfigStore(private val securePrefs: SecurePrefs) {
                 putBoolean(KEY_ENABLED, config.enabled)
                 putString(KEY_HASH, config.pinHash)
                 putString(KEY_SALT, config.pinSalt)
+                putInt(KEY_LENGTH, config.pinLength)
             }
             _config.value = config
         } catch (t: Throwable) {
@@ -44,19 +39,16 @@ class DecoyConfigStore(private val securePrefs: SecurePrefs) {
         save(_config.value.copy(enabled = value))
     }
 
-    /**
-     * Configure le PIN leurre. Si [pin] est vide, efface et désactive.
-     * Génère un sel frais et stocke le hash.
-     */
     fun setDecoyPin(pin: String) {
         val current = _config.value
         val next = if (pin.isEmpty()) {
-            current.copy(enabled = false, pinHash = "", pinSalt = "")
+            current.copy(enabled = false, pinHash = "", pinSalt = "", pinLength = 0)
         } else {
             val salt = PinHasher.newSalt()
             current.copy(
                 pinHash = PinHasher.hash(pin, salt),
                 pinSalt = salt,
+                pinLength = pin.length,
             )
         }
         save(next)
@@ -67,5 +59,6 @@ class DecoyConfigStore(private val securePrefs: SecurePrefs) {
         private const val KEY_ENABLED = "decoy.enabled"
         private const val KEY_HASH = "decoy.pin_hash"
         private const val KEY_SALT = "decoy.pin_salt"
+        private const val KEY_LENGTH = "decoy.pin_length"
     }
 }

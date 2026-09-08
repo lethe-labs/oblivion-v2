@@ -50,16 +50,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import oblivion.v2.R
 import oblivion.v2.core.guard.GuardConfig
 
-/**
- * Écran de configuration du Garde-clefs (Étape 2C).
- *
- * 5 sections :
- *  1. État global : toggle master + statut Accessibility
- *  2. Type A : mot de passe de détresse → wipe
- *  3. Type B : longueur-piège → wipe
- *  4. EMERGENCY : mot de passe d'urgence → wipe
- *  5. Tentatives échouées : seuil + compteur courant
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuardScreen(
@@ -71,8 +61,6 @@ fun GuardScreen(
     val failedCount by vm.failedAttemptsCount.collectAsStateWithLifecycle()
     val ctx = LocalContext.current
 
-    // Rafraîchit l'état (Accessibility + compteur) quand l'utilisateur revient
-    // d'un écran système (ex. après avoir activé le service d'accessibilité).
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -234,7 +222,6 @@ private fun EmergencySection(
     )
 }
 
-/** Section générique pour un PIN-based detector (Type A ou EMERGENCY). */
 @Composable
 private fun PinSection(
     title: String,
