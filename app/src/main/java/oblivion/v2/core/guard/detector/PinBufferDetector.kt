@@ -5,6 +5,23 @@ import oblivion.v2.core.crypto.PinHasher
 import oblivion.v2.core.guard.GuardDetector
 import oblivion.v2.core.log.SecLog
 
+/**
+ * Shared engine for the three "type a secret on the lockscreen" detectors:
+ * TypeA, Emergency and Decoy. They used to be near-identical ~120-line copies,
+ * which meant the buffer defect described in PinCandidateBuffer existed in
+ * triplicate and had to be fixed three times.
+ *
+ * Two detection paths run side by side because neither is reliable alone:
+ *   CLICK  primary -- TYPE_VIEW_CLICKED on each keypad key, digit read from
+ *          contentDescription. Fires without pressing validate.
+ *   TEXT   fallback -- cursor position in TYPE_VIEW_TEXT_CHANGED, for third
+ *          party keyboards and OEM lockscreens that emit no usable clicks.
+ *
+ * @param expectedLength length of the secret, 0 when unknown (config written
+ *        before the length was persisted).
+ * @param resetOnWindowChange historical Emergency behaviour: treat a window
+ *        change as a new attempt.
+ */
 abstract class PinBufferDetector(
     private val expectedHash: String,
     private val salt: String,
@@ -87,6 +104,8 @@ abstract class PinBufferDetector(
         return matches(textBuffer, "text")
     }
 
+    // Exactly one PBKDF2 derivation per call when the length is known; only
+    // legacy configs (cheap SHA-256) fall back to scanning every suffix.
     private fun matches(buffer: PinCandidateBuffer, path: String): Boolean {
         if (expectedHash.isEmpty() || salt.isEmpty()) return false
         val candidates = buffer.candidates(expectedLength, MIN_CHECK)

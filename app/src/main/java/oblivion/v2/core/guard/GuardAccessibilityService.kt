@@ -91,6 +91,10 @@ class GuardAccessibilityService : AccessibilityService() {
                     AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
             it.notificationTimeout = 100L
             it.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
+            // Scoped to SystemUI: the guard must never see events from the
+            // user's other apps. This is a privacy boundary, not an
+            // optimisation -- an accessibility service that reads everything
+            // would be indefensible in an app aimed at at-risk users.
             it.packageNames = arrayOf(SYSTEMUI_PACKAGE)
         }
         SecLog.d(TAG, "Service connected. Listening to $SYSTEMUI_PACKAGE")
@@ -119,6 +123,9 @@ class GuardAccessibilityService : AccessibilityService() {
         if (pkg != null && pkg != SYSTEMUI_PACKAGE) return
 
         for (detector in detectors) {
+            // One detector throwing must not take the others down with it:
+            // they are independent triggers and the user may only have armed
+            // the one that just failed.
             val matched = runCatching { detector.onEvent(event) }
                 .onFailure { SecLog.e(TAG, "Detector ${detector.name} threw", it) }
                 .getOrDefault(false)
@@ -182,6 +189,17 @@ class GuardAccessibilityService : AccessibilityService() {
         )
     }
 
+    /**
+     * A full-screen-intent notification is the *only* supported way to put a UI
+     * over the keyguard from a service: startActivity() is blocked by the
+     * background-activity-launch restrictions while locked, and
+     * TYPE_APPLICATION_OVERLAY is layered below the keyguard window on purpose
+     * (anti-phishing). This is the mechanism incoming-call apps use.
+     *
+     * The delay lets the decoy screen reach a believable progress before
+     * wipeData() kills the process -- long enough to convince, short enough
+     * that the attacker cannot pull the battery or reach safe mode.
+     */
     private fun handleDecoyMatch() {
         runCatching { DecoyNotifier.trigger(applicationContext) }
             .onFailure { SecLog.e(TAG, "DecoyNotifier.trigger threw", it) }
@@ -191,6 +209,13 @@ class GuardAccessibilityService : AccessibilityService() {
         )
     }
 
+    /**
+     * Turning the accessibility service off in Settings is how an attacker
+     * would neutralise the guard, so revocation while armed is itself a wipe
+     * trigger. onUnbind also fires on app updates and low-memory kills, which
+     * is why the decision is delegated to GuardRevocationDetector: it confirms
+     * against Settings.Secure that the service really is disabled.
+     */
     override fun onUnbind(intent: Intent?): Boolean {
         SecLog.w(TAG, "onUnbind called — checking for revocation")
         try {

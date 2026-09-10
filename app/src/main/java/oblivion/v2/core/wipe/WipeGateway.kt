@@ -22,6 +22,15 @@ class WipeGateway(private val context: Context) {
     fun adminComponentName(): ComponentName =
         ComponentName(appCtx, DeviceAdminReceiver::class.java)
 
+    /**
+     * Delegated to the platform rather than counted by the accessibility
+     * service: the "wrong PIN" announcements we would have to parse vary by
+     * locale and by OEM, so counting them ourselves is unreliable in both
+     * directions. The system counter also resets itself on a successful unlock
+     * and survives reboots.
+     *
+     * count = 0 disables the policy. No-op when admin is inactive.
+     */
     fun setMaxFailedAttemptsForWipe(count: Int) {
         val dpm = appCtx.getSystemService(DevicePolicyManager::class.java) ?: return
         val component = adminComponentName()
@@ -52,6 +61,13 @@ class WipeGateway(private val context: Context) {
         return runCatching { dpm.currentFailedPasswordAttempts }.getOrDefault(0)
     }
 
+    /**
+     * IRREVERSIBLE. Single entry point for every trigger.
+     *
+     * A returned WipeResult.Called does not prove the device was erased: on
+     * success the process is normally killed before the value can be used, so
+     * "Called" only means the platform accepted the call without throwing.
+     */
     fun wipeNow(): WipeResult {
         val dpm = appCtx.getSystemService(DevicePolicyManager::class.java)
         if (dpm == null) {

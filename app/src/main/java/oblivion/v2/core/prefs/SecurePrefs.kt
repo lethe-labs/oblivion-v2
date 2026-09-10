@@ -9,6 +9,20 @@ import oblivion.v2.core.log.SecLog
 import java.io.File
 import java.security.KeyStore
 
+/**
+ * Wrapper around EncryptedSharedPreferences, and the single most dangerous
+ * class in the project: it can factory-reset the device on its own.
+ *
+ * When the store fails to open, two indistinguishable scenarios have to be told
+ * apart from the exception alone:
+ *   - tampering: someone altered the file to neutralise Oblivion -> wipe;
+ *   - legitimate key loss: the Keystore master key is gone or unusable after an
+ *     OEM update, a restore, or a vendor Keystore bug -> absolutely no wipe.
+ *
+ * The previous guard was "wipe if device admin is active", which discriminated
+ * nothing: the admin is *always* active during a key loss, so a routine system
+ * event irreversibly erased the phone.
+ */
 class SecurePrefs private constructor(val prefs: SharedPreferences) {
     companion object {
         private const val TAG = "SecurePrefs"
@@ -24,6 +38,9 @@ class SecurePrefs private constructor(val prefs: SharedPreferences) {
                 SecLog.e(TAG, "EncryptedSharedPreferences illisible (essai 1/2)", first)
             }
 
+            // Second attempt on purpose: a single failure can be transient
+            // (Keystore not ready right after LOCKED_BOOT_COMPLETED, disk
+            // contention at boot). Wiping on a startup fluke is unacceptable.
             try {
                 return SecurePrefs(buildEncrypted(appCtx))
             } catch (second: Throwable) {
@@ -34,6 +51,15 @@ class SecurePrefs private constructor(val prefs: SharedPreferences) {
             return SecurePrefs(rebuildFromScratch(appCtx))
         }
 
+        /**
+         * Wipes only when all three tampering conditions hold. Removing any one
+         * of these checks brings back irreversible resets on healthy devices --
+         * weigh that before touching this method.
+         *
+         * The Keystore check is the decisive one: an attacker who can delete a
+         * Keystore entry already has root, and would not bother mangling a
+         * preferences file to get it.
+         */
         private fun onUnreadable(appCtx: Context) {
             if (!prefsFileExists(appCtx)) {
                 SecLog.w(TAG, "Aucun fichier de prefs sur le disque → première install, pas de wipe")
@@ -59,6 +85,19 @@ class SecurePrefs private constructor(val prefs: SharedPreferences) {
             }
         }
 
+        /**
+         * Start over with an empty store so the app stays launchable; the
+         * configuration is lost, which is the price.
+         *
+         * Deleting the prefs file is enough to drop the Tink keysets too: they
+         * live inside this very file (AndroidKeysetManager.withSharedPref binds
+         * them to FILE_NAME). If that still fails, the master key itself is the
+         * problem and gets rotated.
+         *
+         * A final failure is allowed to propagate on purpose. An app that
+         * refuses to start beats an app that would fall back to storing duress
+         * PINs in cleartext.
+         */
         private fun rebuildFromScratch(appCtx: Context): SharedPreferences {
             appCtx.deleteSharedPreferences(FILE_NAME)
             return try {

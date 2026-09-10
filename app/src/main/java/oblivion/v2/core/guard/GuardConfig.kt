@@ -9,6 +9,9 @@ data class GuardConfig(
 
     val typeALength: Int = 0,
 
+    // Length trap: any PIN of exactly this many digits wipes, whatever the
+    // digits are. The user's real PIN MUST have a different length, otherwise
+    // every ordinary unlock erases the device.
     val typeBEnabled: Boolean = false,
     val typeBLength: Int = 0,
 

@@ -22,6 +22,12 @@
 
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <!--
+      Decoy mode depends on this. On Android 14+ the user must grant it by hand
+      (Settings > Apps > Oblivion > Notifications > Full screen notifications);
+      below 14 it is granted at install time. Without it the fake "System
+      update" screen never shows and the wipe runs in plain sight.
+    -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
@@ -46,6 +52,13 @@
             </intent-filter>
         </activity>
 
+        <!--
+          Every attribute here is load-bearing: showWhenLocked to appear over
+          the keyguard, turnScreenOn to wake a dark screen, excludeFromRecents
+          and noHistory so the decoy leaves no trace an attacker could scroll
+          back to, singleInstance to avoid re-stacking. Launched only by our own
+          full-screen-intent notification, hence exported="false".
+        -->
         <activity
             android:name=".ui.decoy.DecoyActivity"
             android:exported="false"
@@ -69,6 +82,10 @@
             </intent-filter>
         </receiver>
 
+        <!--
+          directBootAware lets the guard come back before the first unlock after
+          a reboot, exactly the window in which a seized device is attacked.
+        -->
         <service
             android:name=".core.guard.GuardAccessibilityService"
             android:exported="true"
@@ -131,6 +148,12 @@
             </intent-filter>
         </receiver>
 
+        <!--
+          android:permission="BROADCAST_SMS" is a security control, not
+          boilerplate: it makes the system the only possible sender of this
+          broadcast. Drop it and any app on the device could forge an SMS
+          intent and wipe the phone without holding a single permission.
+        -->
         <receiver
             android:name=".core.sms.SmsKillReceiver"
             android:enabled="true"
