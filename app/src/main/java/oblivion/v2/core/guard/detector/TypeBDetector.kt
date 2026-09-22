@@ -16,13 +16,14 @@ class TypeBDetector(
             AccessibilityEvent.TYPE_VIEW_LONG_CLICKED -> {
             }
             AccessibilityEvent.TYPE_ANNOUNCEMENT -> {
-                for (raw in event.text.orEmpty()) {
-                    val t = raw?.toString()?.lowercase().orEmpty()
-                    if (t.startsWith(WRONG_TEXT) || t.startsWith(INCORRECT_TEXT)) {
-                        val ok = pos >= targetLength
-                        pos = 0
-                        return ok
-                    }
+                // A rejection announcement means a full PIN was just submitted
+                // (some lockscreens auto-submit at the expected length and never
+                // send an OK click). Match FR + EN via the shared vocabulary so
+                // this path is not English-only.
+                if (LockscreenAnnouncements.isRejection(event.text.orEmpty())) {
+                    val ok = pos >= targetLength
+                    pos = 0
+                    return ok
                 }
                 return false
             }
@@ -64,7 +65,5 @@ class TypeBDetector(
         private const val BUTTON_DELETE_DESC = "delete"
         private const val BUTTON_OK_DESC = "ok"
         private const val BUTTON_ENTER_DESC = "enter"
-        private const val WRONG_TEXT = "wrong"
-        private const val INCORRECT_TEXT = "incorrect"
     }
 }

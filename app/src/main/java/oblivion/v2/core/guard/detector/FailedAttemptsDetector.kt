@@ -19,11 +19,7 @@ class FailedAttemptsDetector(
 
         SecLog.d(TAG, "ANNOUNCEMENT: $phrases")
 
-        val matched = phrases.any { raw ->
-            val t = raw.lowercase()
-            KEYWORDS.any { kw -> t.contains(kw) }
-        }
-        if (!matched) return false
+        if (!LockscreenAnnouncements.isRejection(phrases)) return false
 
         val count = store.incrementFailedAttemptsCount()
         SecLog.d(TAG, "Failed attempt detected. Count = $count / threshold = $threshold")
@@ -35,14 +31,5 @@ class FailedAttemptsDetector(
 
     private companion object {
         private const val TAG = "FailedAttemptsDetector"
-
-        private val KEYWORDS = listOf(
-            "incorrect",
-            "wrong",
-            "erron",
-            "réessay",
-            "try again",
-            "faux",
-        )
     }
 }
