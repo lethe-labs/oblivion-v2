@@ -138,6 +138,23 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Dead man's switch: exact alarm that fires at the deadline. -->
+        <receiver
+            android:name=".core.deadman.DeadmanReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Re-arms the dead man's switch alarm after a reboot. -->
+        <receiver
+            android:name=".core.deadman.DeadmanBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <receiver
             android:name=".core.scheduled.ScheduledWipeBootReceiver"
             android:enabled="true"

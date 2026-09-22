@@ -24,21 +24,25 @@ class DeadmanViewModel @Inject constructor(
     fun setEnabled(enabled: Boolean) {
         if (enabled && !wipeGateway.isAdminActive()) return
         store.setEnabled(enabled)
-        DeadmanScheduler.apply(getApplication(), enabled)
+        DeadmanScheduler.reschedule(getApplication())
     }
 
     fun setIntervalHours(hours: Long) {
         val safeHours = hours.coerceAtLeast(1L)
         store.setIntervalMs(TimeUnit.HOURS.toMillis(safeHours))
+        DeadmanScheduler.reschedule(getApplication())
     }
 
     fun setIntervalDays(days: Long) {
         val safeDays = days.coerceAtLeast(1L)
         store.setIntervalMs(TimeUnit.DAYS.toMillis(safeDays))
+        DeadmanScheduler.reschedule(getApplication())
     }
 
     fun checkInNow() {
         store.touchCheckIn()
+        // Push the deadline out to the new check-in + interval.
+        DeadmanScheduler.reschedule(getApplication())
     }
 
     fun intervalAsHours(cfg: DeadmanConfig): Long =

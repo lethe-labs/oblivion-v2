@@ -1,16 +1,20 @@
 package oblivion.v2.core.auth
 
+import android.content.Context
 import android.os.SystemClock
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import oblivion.v2.core.deadman.DeadmanConfigStore
+import oblivion.v2.core.deadman.DeadmanScheduler
 import oblivion.v2.core.log.SecLog
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BiometricAuthState @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val deadmanConfigStore: DeadmanConfigStore,
 ) {
     @Volatile
@@ -25,7 +29,10 @@ class BiometricAuthState @Inject constructor(
         _isAuthenticated.value = true
 
         try {
+            // A successful biometric auth is the dead man's switch check-in;
+            // push its exact-alarm deadline out accordingly.
             deadmanConfigStore.touchCheckIn()
+            DeadmanScheduler.reschedule(appContext)
         } catch (t: Throwable) {
             SecLog.e(TAG, "touchCheckIn threw", t)
         }

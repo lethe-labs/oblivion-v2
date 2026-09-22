@@ -30,7 +30,7 @@ class OblivionApp : Application() {
             )
             val cfg = entryPoint.deadmanConfigStore().load()
             if (cfg.enabled) {
-                DeadmanScheduler.schedule(this)
+                DeadmanScheduler.reschedule(this)
             }
         } catch (t: Throwable) {
             SecLog.e("OblivionApp", "reScheduleDeadmanIfEnabled threw", t)
