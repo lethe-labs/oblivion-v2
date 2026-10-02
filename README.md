@@ -11,7 +11,7 @@
 [![Offline](https://img.shields.io/badge/100%25-offline-blue.svg)]()
 [![Telemetry: 0](https://img.shields.io/badge/Telemetry-0-black.svg)]()
 
-*When someone gets their hands on your phone, you decide what stays — and what disappears.*
+*Independent triggers that factory-reset your phone when you can no longer protect it yourself.*
 
 [Documentation française](docs/README.fr.md) · [Security policy](SECURITY.md) · [Known limitations](#known-limitations)
 
@@ -30,7 +30,7 @@ data sovereignty**, including:
 - Whistleblowers protecting source identity
 - Survivors of domestic violence and stalking
 - Security researchers studying duress-resistance systems
-- Privacy-conscious individuals who need provable data sovereignty
+- Privacy-conscious individuals with a concrete threat model
 
 This software is provided under the **GNU Affero General Public License v3.0**.
 Misuse for the destruction of evidence in lawful criminal proceedings is
@@ -46,7 +46,7 @@ factory reset via the native Android `DevicePolicyManager.wipeData()` API.
 
 | # | Trigger | Mechanism |
 |---|---|---|
-| 1 | **Guard — Lockscreen** | Distress PIN, length-trap, or N failed attempts (via `AccessibilityService`) |
+| 1 | **Guard — Lockscreen** | Distress PIN or length-trap (via `AccessibilityService`); N failed attempts (via the platform's `setMaximumFailedPasswordsForWipe`) |
 | 2 | **USB Kill** | USB/charger connection while locked → countdown → wipe |
 | 3 | **SMS Wipe** | Authorized number + secret keyword via `BroadcastReceiver` |
 | 4 | **Voice Wipe** | Offline keyphrase recognition (Vosk · FR + EN models bundled) |
@@ -55,8 +55,9 @@ factory reset via the native Android `DevicePolicyManager.wipeData()` API.
 | 7 | **Decoy Mode** | Decoy PIN → fake "System Update" full-screen page while wipe runs silently behind |
 
 All triggers run in parallel. Disarming any trigger requires biometric
-authentication. The application has **no `INTERNET` permission** declared and
-is technically incapable of network communication.
+authentication. The application declares **no `INTERNET` permission**, so it
+cannot open network connections — a property anyone can verify in
+[`AndroidManifest.xml`](app/src/main/AndroidManifest.xml).
 
 ---
 
@@ -65,12 +66,12 @@ is technically incapable of network communication.
 | Component | Implementation |
 |---|---|
 | Encryption | AES-256-GCM via `EncryptedSharedPreferences` |
-| Master key | Hardware-backed Android Keystore |
+| Master key | Android Keystore (hardware-backed on devices with a TEE or StrongBox) |
 | PIN hash | PBKDF2-HMAC-SHA256, 100 000 iterations + 32-byte random salt |
-| PIN comparison | Timing-safe (side-channel resistant) |
+| PIN comparison | Constant-time |
 | Wipe mechanism | `DevicePolicyManager.wipeData()` (native Device Admin) |
-| Voice recognition | Vosk (offline, FR + EN small models bundled) |
-| Persistence | `WorkManager` + `AlarmManager` exact, reboot-resistant |
+| Voice recognition | Vosk (offline, FR + EN small models bundled — see licensing note below) |
+| Persistence | Exact `AlarmManager` alarms with a `WorkManager` fallback, re-armed after reboot |
 | Min SDK | API 26 · Android 8.0 |
 | Target SDK | API 33 · intentional (API 34+ blocks `wipeData()` for non-DO apps) |
 
@@ -79,10 +80,12 @@ is technically incapable of network communication.
 - No data is ever sent to a third-party server
 - Zero telemetry, zero analytics, no crash reporters
 - All secrets stored in `EncryptedSharedPreferences` (Tink/AES-256-GCM)
-- No persistent notifications at runtime (the decoy notification is intentional)
+- No notification at rest. While USB Kill or Voice Wipe is armed, Android
+  requires a foreground-service notification; the decoy notification is
+  intentional
 - All triggers can be individually toggled and configured
 - Biometric authentication required to disarm any trigger
-- Full persistence across reboot and force-stop
+- Triggers are re-armed after a reboot (see *Known limitations* for force-stop)
 - Open-source, auditable, modifiable
 
 ---
@@ -94,7 +97,7 @@ is technically incapable of network communication.
 - Android Studio **Hedgehog (2023.1.1)** or newer
 - JDK 17 (bundled with Android Studio)
 - Android SDK 34 installed
-- A device or emulator running **Android 10 or newer**
+- A device or emulator running **Android 8.0 (API 26) or newer**
 
 ### Build commands
 
@@ -140,7 +143,23 @@ To replace a model with a different one, download it from
 Extract the ZIP and copy its contents into `app/src/main/assets/model-<lang>/`,
 matching the structure of the models already present.
 
-Both models are released under **Apache 2.0** — commercial use is permitted.
+#### Licensing — read this before redistributing
+
+The two bundled models are **not** under the same license:
+
+| Model | License | Free software? |
+|---|---|---|
+| `vosk-model-small-en-us-0.15` | Apache 2.0 | Yes |
+| `vosk-model-small-fr-pguyot` (bundled) | **CC BY-NC-SA 4.0** | **No** — non-commercial clause |
+
+The French model's *NonCommercial* clause means an APK built from this
+repository cannot be redistributed for commercial purposes, and is not
+entirely free software. Its license text and attribution ship alongside it in
+`app/src/main/assets/model-fr/`.
+
+An Apache 2.0 French model exists, `vosk-model-small-fr-0.22` (~41 MB). It has
+not yet been evaluated in this project; switching to it is the planned fix,
+and a prerequisite for F-Droid inclusion.
 
 ---
 
@@ -162,6 +181,18 @@ Total setup time: ~5 minutes.
 Oblivion is built on standard Android APIs and respects the platform's
 constraints. The following limitations are known and documented:
 
+- **Nothing runs while the phone is off.** Every trigger is software running
+  on a powered-on device. An adversary who switches the phone off before any
+  trigger fires, or cuts it off from the mobile network (e.g. in a Faraday
+  bag), disables the remote and time-based triggers. A powered-off phone is
+  then protected only by Android's own encryption.
+- **A force-stop suspends the triggers.** Force-stopping the app from
+  Settings cancels its alarms and blocks its broadcasts until it is opened
+  again. This requires an already-unlocked device, which is outside the
+  threat model below, but it is worth knowing.
+- **Aggressive OEM battery management can kill background services**
+  (Xiaomi, Huawei, Samsung, Oppo…). Exempt Oblivion from battery
+  optimisation, and test your setup on your own device.
 - **External SD card is not wiped.** `DevicePolicyManager.wipeData()` only
   factory-resets internal storage. If your threat model includes external
   storage, encrypt it separately.
@@ -174,8 +205,10 @@ constraints. The following limitations are known and documented:
   to hide it if your threat model requires concealment.
 - **Voice recognition can fire accidentally** if the keyphrase is too
   common. Choose 3–5 unusual words together. False-positive risk is real.
-- **WorkManager periodic minimum is 15 minutes.** The Dead Man's Switch
-  checks every 15 minutes; expect up to that delay between expiry and wipe.
+- **The Dead Man's Switch can fall back to a 15-minute check.** It normally
+  fires on an exact alarm at the deadline. If the exact-alarm permission is
+  revoked, or an OEM battery manager kills the alarm, a periodic check takes
+  over, which can run up to 15 minutes late.
 - **SMS sender identity can be spoofed.** Caller ID on an inbound SMS is not
   authenticated by the network and can be forged through commercial gateways.
   Anyone who learns your keyword can therefore fire the SMS trigger remotely.
@@ -194,17 +227,30 @@ constraints. The following limitations are known and documented:
 
 ## Threat model
 
-Oblivion is designed to be effective against:
+Oblivion only helps if a trigger fires **before** the adversary controls the
+device's power and connectivity. Within that window, it is designed to help
+against:
 
-- ✓ Unlawful device seizure (search, theft, coercion)
-- ✓ Offline forensic acquisition attempts (USB, JTAG via Cellebrite, GrayKey)
-- ✓ PIN-brute-force and shoulder-surfing attacks
-- ✓ Remote compromise scenarios where SMS authority is preserved
+- ✓ Seizure, theft or coercion where you can enter a duress PIN, or where the
+  device stays powered on and locked
+- ✓ Connecting a USB extraction tool to a powered-on, locked device (USB Kill
+  fires on connection)
+- ✓ Guessing the PIN through the lockscreen (failed-attempt threshold)
+- ✓ Remote wipe after loss or seizure, while the device is powered on and
+  receiving SMS (see the spoofing caveat above)
 
 Oblivion is **not** designed to defend against:
 
-- ✗ State-actor-level adversaries with kernel-level exploits or hardware modification
+- ✗ Acquisition of a powered-off device, and hardware-level attacks (JTAG,
+  chip-off)
+- ✗ An adversary who powers the device off or isolates it from the network
+  before a trigger fires
+- ✗ Commercial forensic tools (Cellebrite, GrayKey…) beyond what USB Kill
+  provides when they are connected to a powered-on, locked device
+- ✗ Adversaries with kernel-level exploits or hardware modification
 - ✗ Devices already unlocked and live in the adversary's hands
+- ✗ Shoulder-surfing: someone who has watched you type your real PIN can
+  simply unlock the phone
 - ✗ Pre-wipe network exfiltration by malware already installed
 - ✗ Lawful seizure where you are legally compelled to provide access
 
@@ -251,6 +297,9 @@ The AGPL ensures that any modified version of Oblivion, even when distributed
 over a network as a service, must remain free and open. This protects against
 proprietary forks that would erode trust in the underlying tool.
 
+The AGPL covers the code. The bundled Vosk models are separate works under
+their own licenses — see [Licensing](#licensing--read-this-before-redistributing).
+
 ```
 Oblivion V2 — Anti-forensic duress-wipe system for Android
 Copyright (C) 2025–present  lethe-labs
@@ -272,7 +321,8 @@ GNU Affero General Public License for more details.
 
 - **GitHub**: <https://github.com/lethe-labs>
 - **Security**: see [SECURITY.md](SECURITY.md) for the PGP key and disclosure policy
-- **F-Droid**: submission planned
+- **F-Droid**: submission planned, once the French voice model is replaced by
+  a free one
 
 ---
 
