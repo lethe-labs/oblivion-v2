@@ -213,7 +213,7 @@
     <string name="voice_master_desc">Runs a foreground service that listens for the trigger phrase when the screen is locked. Micro access requires an explicit Android permission.</string>
 
     <string name="voice_rules_title">Rules</string>
-    <string name="voice_rules_body" formatted="false">• The mic is only active when the screen is locked.\n• When unlocked, the mic is off (battery + privacy).\n• On phrase detection → immediate wipe.\n• Vosk runs 100% offline — no data leaves the device.\n• Its notification is hidden from the lock screen.</string>
+    <string name="voice_rules_body" formatted="false">• The mic is only active when the screen is locked.\n• When unlocked, the mic is off (battery + privacy).\n• On phrase detection → immediate wipe.\n• Vosk runs 100% offline — no data leaves the device.\n• Its notification is hidden from the lock screen, but Android still shows its green microphone indicator while it listens: no app can hide it.</string>
 
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Persistent notification while the Voice Wipe service is active.</string>

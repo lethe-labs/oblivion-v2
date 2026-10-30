@@ -202,7 +202,9 @@ documentées :
   verrouillage.** USB Kill et Voice Wipe n'y apparaissent jamais : un
   téléphone verrouillé ne trahit pas Oblivion et ne souffle pas à un intrus
   de débrancher. Le revers : si tu branches ton propre téléphone verrouillé,
-  rien ne te prévient. Débranche-le avant la fin du délai.
+  rien ne te prévient. Débranche-le avant la fin du délai. Voice Wipe reste
+  repérable autrement : pendant l'écoute, Android affiche son indicateur de
+  micro vert, qu'aucune app ne peut masquer.
 - **Pas de diffusion possible sur Google Play.** Depuis Android 14, le pavé
   du PIN de l'écran de verrouillage ne s'adresse qu'aux services déclarés
   comme outils d'accessibilité : le Guard doit donc se déclarer comme tel.

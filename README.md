@@ -197,7 +197,8 @@ constraints. The following limitations are known and documented:
   Voice Wipe never appear there, so a locked phone neither reveals Oblivion
   nor tells an attacker to unplug. The flip side: if you plug in your own
   phone while it is locked, nothing warns you. Unplug it before the grace
-  period ends.
+  period ends. Voice Wipe stays detectable another way: while it listens,
+  Android shows its green microphone indicator, which no app can hide.
 - **Not distributable on Google Play.** Since Android 14, the lock-screen PIN
   pad only reports to services declared as accessibility tools, so the Guard
   has to declare itself one. Google Play reserves that declaration for

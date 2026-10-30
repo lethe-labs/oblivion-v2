@@ -213,7 +213,7 @@
     <string name="voice_master_desc">Lance un service foreground qui écoute la phrase-clé quand l\'écran est verrouillé. L\'accès au micro nécessite une permission Android explicite.</string>
 
     <string name="voice_rules_title">Règles</string>
-    <string name="voice_rules_body" formatted="false">• Le micro n\'est actif que quand l\'écran est verrouillé.\n• Quand l\'écran est déverrouillé, le micro est coupé (batterie + vie privée).\n• Détection de la phrase → effacement immédiat.\n• Vosk tourne 100 % hors-ligne — aucune donnée ne quitte l\'appareil.\n• Sa notification est masquée sur l\'écran de verrouillage.</string>
+    <string name="voice_rules_body" formatted="false">• Le micro n\'est actif que quand l\'écran est verrouillé.\n• Quand l\'écran est déverrouillé, le micro est coupé (batterie + vie privée).\n• Détection de la phrase → effacement immédiat.\n• Vosk tourne 100 % hors-ligne — aucune donnée ne quitte l\'appareil.\n• Sa notification est masquée sur l\'écran de verrouillage, mais Android affiche toujours son indicateur de micro vert pendant l\'écoute : aucune app ne peut le masquer.</string>
 
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Notification persistante pendant que le service Voice Wipe est actif.</string>
