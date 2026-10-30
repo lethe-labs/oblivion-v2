@@ -97,7 +97,7 @@
     <string name="sms_master_desc">Monitors incoming SMS. If the sender and keyword match, the device is wiped immediately.</string>
 
     <string name="sms_rules_title">Rules</string>
-    <string name="sms_rules_body">• Only SMS from the authorized number are checked.\n• The keyword match is case-insensitive.\n• The SMS body must contain the keyword (not necessarily equal).\n• Works even when the screen is locked.\n• Does NOT require a SIM on the testing device — use the simulator below.</string>
+    <string name="sms_rules_body">• Only SMS from the authorized number are checked.\n• The keyword match is case-insensitive.\n• The keyword must appear as a separate word: &quot;wipe&quot; does not match &quot;swiped&quot;.\n• Works even when the screen is locked.\n• Does NOT require a SIM on the testing device — use the simulator below.</string>
 
     <string name="sms_sim_title">// DEBUG — SMS Simulator</string>
     <string name="sms_sim_desc">Test the trigger logic without a real SMS. This does NOT wipe — it only checks if the sender and keyword match.</string>
@@ -171,7 +171,7 @@
     <string name="usb_notif_perm_grant">Grant permission</string>
 
     <string name="usb_rules_title">Rules</string>
-    <string name="usb_rules_body">• Triggers only when the screen is locked.\n• Plug-in while locked → countdown starts.\n• Unplug during countdown → aborts.\n• Countdown reaches zero → wipe.</string>
+    <string name="usb_rules_body">• Triggers only when the screen is locked.\n• Plug-in while locked → countdown starts.\n• Unplug during countdown → aborts.\n• Countdown reaches zero → wipe.\n• The countdown is never shown on the lock screen, so it cannot tell an attacker to unplug. If you plug in your own phone while it is locked, unplug it before the grace period ends.</string>
 
     <string name="usb_channel_name">USB Kill</string>
     <string name="usb_channel_desc">Persistent notification while the USB Kill service is active.</string>
@@ -192,7 +192,7 @@
     <string name="voice_perm_grant">Grant permission</string>
 
     <string name="voice_model_title">Vosk model (offline)</string>
-    <string name="voice_model_desc">Voice Wipe uses the Vosk small model (~40 MB per language), 100 %% offline. Two languages are supported: French (assets/model-fr/) and English (assets/model-en/).\n\nIf a model is missing, download it from alphacephei.com/vosk/models:\n• FR: vosk-model-small-fr-pguyot\n• EN: vosk-model-small-en-us-0.15\n\nExtract the ZIP and copy its contents into the matching assets/model-&lt;lang&gt;/ folder, then rebuild the APK.</string>
+    <string name="voice_model_desc" formatted="false">Voice Wipe uses the Vosk small model (~65 MB per language), 100% offline. Two languages are supported: French (assets/model-fr/) and English (assets/model-en/).\n\nIf a model is missing, download it from alphacephei.com/vosk/models:\n• FR: vosk-model-small-fr-pguyot\n• EN: vosk-model-small-en-us-0.15\n\nExtract the ZIP and copy its contents into the matching assets/model-&lt;lang&gt;/ folder, then rebuild the APK.</string>
     <string name="voice_lang_title">Voice recognition language</string>
     <string name="voice_lang_desc">Select the Vosk model to use. The model must be present in app/src/main/assets/model-&lt;code&gt;/.</string>
     <string name="voice_lang_fr">French</string>
@@ -213,7 +213,7 @@
     <string name="voice_master_desc">Runs a foreground service that listens for the trigger phrase when the screen is locked. Micro access requires an explicit Android permission.</string>
 
     <string name="voice_rules_title">Rules</string>
-    <string name="voice_rules_body">• The mic is only active when the screen is locked.\n• When unlocked, the mic is off (battery + privacy).\n• On phrase detection → immediate wipe.\n• Vosk runs 100 %% offline — no data leaves the device.</string>
+    <string name="voice_rules_body" formatted="false">• The mic is only active when the screen is locked.\n• When unlocked, the mic is off (battery + privacy).\n• On phrase detection → immediate wipe.\n• Vosk runs 100% offline — no data leaves the device.\n• Its notification is hidden from the lock screen.</string>
 
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Persistent notification while the Voice Wipe service is active.</string>
@@ -256,7 +256,7 @@
     <string name="deadman_checkin_now">Check-in now</string>
 
     <string name="deadman_rules_title">Rules</string>
-    <string name="deadman_rules_body">• The countdown resets every time you unlock the app via biometrics.\n• A periodic background task checks the deadline (every 15 min).\n• Works even when the app is closed (as long as Android has not killed the WorkManager job).\n• 100%% silent: no notification, no alert.\n• Minimum 1 hour, maximum 60 days.</string>
+    <string name="deadman_rules_body" formatted="false">• The countdown resets every time you unlock the app via biometrics.\n• An exact alarm fires at the deadline; a check every 15 min backs it up.\n• Works even when the app is closed. Aggressive battery optimisation can delay it: exempt Oblivion.\n• 100% silent: no notification, no alert.\n• Minimum 1 hour, maximum 60 days.</string>
 
     <string name="scheduled_title">Scheduled wipe</string>
 
@@ -284,7 +284,7 @@
     <string name="scheduled_disarm_prompt_subtitle">Authenticate to cancel the scheduled wipe.</string>
 
     <string name="scheduled_rules_title">Rules</string>
-    <string name="scheduled_rules_body">• AlarmManager triggers at the chosen exact time, even in Doze.\n• Re-armed automatically after reboot.\n• 100%% silent: no notification, no pre-alert.\n• Cancelling requires biometric authentication.\n• If Device Admin is revoked between arming and firing, the wipe is dropped.</string>
+    <string name="scheduled_rules_body" formatted="false">• AlarmManager triggers at the chosen exact time, even in Doze.\n• Re-armed automatically after reboot.\n• If the time passes while the phone is off, the wipe fires at the next boot.\n• 100% silent: no notification, no pre-alert.\n• Cancelling requires biometric authentication.\n• If Device Admin is revoked between arming and firing, the wipe is dropped.</string>
 
     <string name="decoy_title">Decoy mode</string>
 
@@ -316,9 +316,10 @@
     <string name="decoy_pin_clear">Clear PIN</string>
 
     <string name="decoy_rules_title">Rules</string>
-    <string name="decoy_rules_body">• Uses the Guard accessibility service (lockscreen monitoring).\n• Independent from the Guard master switch — works alone.\n• PIN is stored as SHA-256 + salt, never in clear.\n• On match: wipe in background + fullscreen fake &quot;System update&quot; screen.\n• The fake update UI is uncloseable; the wipe finishes under the cover.\n• Use a sequence you would never type by accident.</string>
+    <string name="decoy_rules_body">• Uses the Guard accessibility service (lockscreen monitoring).\n• Independent from the Guard master switch — works alone.\n• The PIN is never stored: only a PBKDF2 derivation is kept.\n• On match: fullscreen fake &quot;System update&quot; screen, and the reset starts 8 seconds later.\n• The phone then restarts into Android\'s own erase screen.\n• Use a sequence you would never type by accident.</string>
 
     <string name="decoy_update_title">System update</string>
     <string name="decoy_update_subtitle">Installing update…</string>
     <string name="decoy_update_note">Do not turn off your device.</string>
+    <string name="duration_days_hours_minutes">%1$dd %2$dh %3$dm</string>
 </resources>

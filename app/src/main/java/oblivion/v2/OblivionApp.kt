@@ -1,6 +1,7 @@
 package oblivion.v2
 
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
@@ -49,6 +50,10 @@ class OblivionApp : Application() {
 
         runCatching { nm.deleteNotificationChannel("oblivion.usb_kill") }
         runCatching { nm.deleteNotificationChannel("oblivion.usb_kill.v2") }
+        // Channel settings are frozen once created, so hiding the trigger
+        // notifications from the lock screen needs fresh channel ids.
+        runCatching { nm.deleteNotificationChannel("oblivion.usb_kill.v3") }
+        runCatching { nm.deleteNotificationChannel("oblivion.voice_kill.v1") }
 
         val usbChannel = NotificationChannel(
             CHANNEL_USB_KILL,
@@ -57,6 +62,7 @@ class OblivionApp : Application() {
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
             description = getString(R.string.usb_channel_desc)
+            lockscreenVisibility = Notification.VISIBILITY_SECRET
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
@@ -70,6 +76,7 @@ class OblivionApp : Application() {
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
             description = getString(R.string.voice_channel_desc)
+            lockscreenVisibility = Notification.VISIBILITY_SECRET
             setShowBadge(false)
             setSound(null, null)
             enableVibration(false)
@@ -81,7 +88,7 @@ class OblivionApp : Application() {
     }
 
     companion object {
-        const val CHANNEL_USB_KILL = "oblivion.usb_kill.v3"
-        const val CHANNEL_VOICE_KILL = "oblivion.voice_kill.v1"
+        const val CHANNEL_USB_KILL = "oblivion.usb_kill.v4"
+        const val CHANNEL_VOICE_KILL = "oblivion.voice_kill.v2"
     }
 }

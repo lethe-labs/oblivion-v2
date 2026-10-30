@@ -97,7 +97,7 @@
     <string name="sms_master_desc">Surveille les SMS entrants. Si l\'expéditeur et le mot-clé correspondent, l\'appareil est effacé immédiatement.</string>
 
     <string name="sms_rules_title">Règles</string>
-    <string name="sms_rules_body">• Seuls les SMS du numéro autorisé sont vérifiés.\n• La correspondance du mot-clé est insensible à la casse.\n• Le corps du SMS doit contenir le mot-clé (pas forcément être égal).\n• Fonctionne même quand l\'écran est verrouillé.\n• Ne nécessite PAS de carte SIM pour tester — utilise le simulateur ci-dessous.</string>
+    <string name="sms_rules_body">• Seuls les SMS du numéro autorisé sont vérifiés.\n• La correspondance du mot-clé est insensible à la casse.\n• Le mot-clé doit apparaître comme un mot distinct : « wipe » ne correspond pas à « swiped ».\n• Fonctionne même quand l\'écran est verrouillé.\n• Ne nécessite PAS de carte SIM pour tester — utilise le simulateur ci-dessous.</string>
 
     <string name="sms_sim_title">// DEBUG — Simulateur SMS</string>
     <string name="sms_sim_desc">Teste la logique du trigger sans vrai SMS. Cela N\'EFFACE PAS — ça vérifie juste si l\'expéditeur et le mot-clé correspondent.</string>
@@ -171,7 +171,7 @@
     <string name="usb_notif_perm_grant">Accorder la permission</string>
 
     <string name="usb_rules_title">Règles</string>
-    <string name="usb_rules_body">• Se déclenche uniquement quand l\'écran est verrouillé.\n• Branchement sur écran verrouillé → démarre le compte à rebours.\n• Débranchement pendant le compte à rebours → annule.\n• Compte à rebours à zéro → wipe.</string>
+    <string name="usb_rules_body">• Se déclenche uniquement quand l\'écran est verrouillé.\n• Branchement sur écran verrouillé → démarre le compte à rebours.\n• Débranchement pendant le compte à rebours → annule.\n• Compte à rebours à zéro → wipe.\n• Le compte à rebours n\'apparaît jamais sur l\'écran de verrouillage, pour ne pas souffler à un intrus de débrancher. Si tu branches ton propre téléphone verrouillé, débranche-le avant la fin du délai.</string>
 
     <string name="usb_channel_name">USB Kill</string>
     <string name="usb_channel_desc">Notification persistante pendant que le service USB Kill est actif.</string>
@@ -192,7 +192,7 @@
     <string name="voice_perm_grant">Accorder la permission</string>
 
     <string name="voice_model_title">Modèle Vosk (hors-ligne)</string>
-    <string name="voice_model_desc">Voice Wipe utilise le modèle Vosk small (~40 Mo par langue), 100 %% hors-ligne. Deux langues sont supportées : français (assets/model-fr/) et anglais (assets/model-en/).\n\nSi un modèle manque, télécharge-le depuis alphacephei.com/vosk/models :\n• FR : vosk-model-small-fr-pguyot\n• EN : vosk-model-small-en-us-0.15\n\nExtrais le ZIP et copie son contenu dans le dossier assets/model-&lt;langue&gt;/ correspondant, puis recompile l\'APK.</string>
+    <string name="voice_model_desc" formatted="false">Voice Wipe utilise le modèle Vosk small (~65 Mo par langue), 100 % hors-ligne. Deux langues sont supportées : français (assets/model-fr/) et anglais (assets/model-en/).\n\nSi un modèle manque, télécharge-le depuis alphacephei.com/vosk/models :\n• FR : vosk-model-small-fr-pguyot\n• EN : vosk-model-small-en-us-0.15\n\nExtrais le ZIP et copie son contenu dans le dossier assets/model-&lt;langue&gt;/ correspondant, puis recompile l\'APK.</string>
     <string name="voice_lang_title">Langue de reconnaissance vocale</string>
     <string name="voice_lang_desc">Sélectionne le modèle Vosk à utiliser. Le modèle doit être présent dans app/src/main/assets/model-&lt;code&gt;/.</string>
     <string name="voice_lang_fr">Français</string>
@@ -213,7 +213,7 @@
     <string name="voice_master_desc">Lance un service foreground qui écoute la phrase-clé quand l\'écran est verrouillé. L\'accès au micro nécessite une permission Android explicite.</string>
 
     <string name="voice_rules_title">Règles</string>
-    <string name="voice_rules_body">• Le micro n\'est actif que quand l\'écran est verrouillé.\n• Quand l\'écran est déverrouillé, le micro est coupé (batterie + vie privée).\n• Détection de la phrase → effacement immédiat.\n• Vosk tourne 100 %% hors-ligne — aucune donnée ne quitte l\'appareil.</string>
+    <string name="voice_rules_body" formatted="false">• Le micro n\'est actif que quand l\'écran est verrouillé.\n• Quand l\'écran est déverrouillé, le micro est coupé (batterie + vie privée).\n• Détection de la phrase → effacement immédiat.\n• Vosk tourne 100 % hors-ligne — aucune donnée ne quitte l\'appareil.\n• Sa notification est masquée sur l\'écran de verrouillage.</string>
 
     <string name="voice_channel_name">Voice Wipe</string>
     <string name="voice_channel_desc">Notification persistante pendant que le service Voice Wipe est actif.</string>
@@ -256,7 +256,7 @@
     <string name="deadman_checkin_now">Check-in maintenant</string>
 
     <string name="deadman_rules_title">Règles</string>
-    <string name="deadman_rules_body">• Le compte à rebours se réinitialise à chaque déverrouillage de l\'app via biométrie.\n• Une tâche de fond périodique vérifie l\'échéance (toutes les 15 min).\n• Fonctionne même app fermée (tant qu\'Android n\'a pas tué le job WorkManager).\n• 100%% silencieux : aucune notification, aucune alerte.\n• Minimum 1 heure, maximum 60 jours.</string>
+    <string name="deadman_rules_body" formatted="false">• Le compte à rebours se réinitialise à chaque déverrouillage de l\'app via biométrie.\n• Une alarme exacte se déclenche à l\'échéance ; une vérification toutes les 15 min sert de secours.\n• Fonctionne même app fermée. Une optimisation de batterie agressive peut la retarder : exclus Oblivion.\n• 100 % silencieux : aucune notification, aucune alerte.\n• Minimum 1 heure, maximum 60 jours.</string>
 
     <string name="scheduled_title">Wipe programmé</string>
 
@@ -284,7 +284,7 @@
     <string name="scheduled_disarm_prompt_subtitle">Authentifie-toi pour annuler le wipe programmé.</string>
 
     <string name="scheduled_rules_title">Règles</string>
-    <string name="scheduled_rules_body">• AlarmManager se déclenche à l\'heure exacte, même en mode Doze.\n• Ré-armé automatiquement après un reboot.\n• 100%% silencieux : aucune notification, aucune pré-alerte.\n• L\'annulation exige une authentification biométrique.\n• Si l\'admin appareil est révoqué entre l\'armement et le déclenchement, le wipe est annulé.</string>
+    <string name="scheduled_rules_body" formatted="false">• AlarmManager se déclenche à l\'heure exacte, même en mode Doze.\n• Ré-armé automatiquement après un reboot.\n• Si l\'heure passe pendant que le téléphone est éteint, le wipe part au démarrage suivant.\n• 100 % silencieux : aucune notification, aucune pré-alerte.\n• L\'annulation exige une authentification biométrique.\n• Si l\'admin appareil est révoqué entre l\'armement et le déclenchement, le wipe est annulé.</string>
 
     <string name="decoy_title">Mode leurre</string>
 
@@ -316,9 +316,10 @@
     <string name="decoy_pin_clear">Effacer le PIN</string>
 
     <string name="decoy_rules_title">Règles</string>
-    <string name="decoy_rules_body">• Utilise le service d\'accessibilité du Garde-clefs (surveillance lockscreen).\n• Indépendant du master switch du Garde-clefs — fonctionne seul.\n• PIN stocké en SHA-256 + sel, jamais en clair.\n• Au match : wipe en arrière-plan + fausse page &quot;Mise à jour système&quot; plein écran.\n• La fausse page ne se ferme pas ; le wipe se termine pendant ce temps.\n• Utilise une séquence que tu ne taperais jamais par accident.</string>
+    <string name="decoy_rules_body">• Utilise le service d\'accessibilité du Garde-clefs (surveillance lockscreen).\n• Indépendant du master switch du Garde-clefs — fonctionne seul.\n• Le PIN n\'est jamais stocké : seule une dérivation PBKDF2 est conservée.\n• Au match : fausse page &quot;Mise à jour système&quot; plein écran, et la réinitialisation démarre 8 secondes plus tard.\n• Le téléphone redémarre alors sur l\'écran d\'effacement d\'Android.\n• Utilise une séquence que tu ne taperais jamais par accident.</string>
 
     <string name="decoy_update_title">Mise à jour système</string>
     <string name="decoy_update_subtitle">Installation en cours…</string>
     <string name="decoy_update_note">N\'éteignez pas votre appareil.</string>
+    <string name="duration_days_hours_minutes">%1$dj %2$dh %3$dm</string>
 </resources>

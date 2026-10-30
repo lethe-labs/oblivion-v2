@@ -193,6 +193,16 @@ constraints. The following limitations are known and documented:
 - **Aggressive OEM battery management can kill background services**
   (Xiaomi, Huawei, Samsung, Oppo…). Exempt Oblivion from battery
   optimisation, and test your setup on your own device.
+- **Trigger notifications are hidden from the lock screen.** USB Kill and
+  Voice Wipe never appear there, so a locked phone neither reveals Oblivion
+  nor tells an attacker to unplug. The flip side: if you plug in your own
+  phone while it is locked, nothing warns you. Unplug it before the grace
+  period ends.
+- **Not distributable on Google Play.** Since Android 14, the lock-screen PIN
+  pad only reports to services declared as accessibility tools, so the Guard
+  has to declare itself one. Google Play reserves that declaration for
+  genuine accessibility apps; Oblivion is distributed through F-Droid and as
+  a direct APK.
 - **External SD card is not wiped.** `DevicePolicyManager.wipeData()` only
   factory-resets internal storage. If your threat model includes external
   storage, encrypt it separately.

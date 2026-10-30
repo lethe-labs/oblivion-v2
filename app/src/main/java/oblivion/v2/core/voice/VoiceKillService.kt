@@ -249,6 +249,9 @@ class VoiceKillService : Service() {
             .setContentText(text)
             .setContentIntent(contentIntent)
             .setOngoing(true)
+            // Hidden on the lock screen: "Listening..." would reveal both the
+            // app and that speaking near the phone can trigger something.
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setSilent(true)

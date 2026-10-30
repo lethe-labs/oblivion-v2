@@ -313,13 +313,14 @@ private fun formatAbsolute(ms: Long): String {
     return fmt.format(java.util.Date(ms))
 }
 
+@Composable
 private fun formatDuration(ms: Long): String {
     val totalMinutes = TimeUnit.MILLISECONDS.toMinutes(ms)
     val days = totalMinutes / (60 * 24)
     val hours = (totalMinutes / 60) % 24
     val minutes = totalMinutes % 60
     return when {
-        days > 0 -> "${days}j ${hours}h ${minutes}m"
+        days > 0 -> stringResource(R.string.duration_days_hours_minutes, days, hours, minutes)
         hours > 0 -> "${hours}h ${minutes}m"
         else -> "${minutes}m"
     }

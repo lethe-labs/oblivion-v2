@@ -164,6 +164,10 @@ class UsbKillService : Service() {
             .setContentText(text)
             .setContentIntent(contentIntent)
             .setOngoing(true)
+            // Never on the lock screen: "wipe in 26 s" would tell whoever holds
+            // the locked phone both that Oblivion is installed and how to stop
+            // it (unplug). The owner knows the rule; the attacker must not.
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setSilent(true)

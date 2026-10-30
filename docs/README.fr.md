@@ -198,6 +198,16 @@ documentées :
   les services en arrière-plan** (Xiaomi, Huawei, Samsung, Oppo…). Exclus
   Oblivion de l'optimisation batterie, et teste ta configuration sur ton
   propre appareil.
+- **Les notifications des triggers sont masquées sur l'écran de
+  verrouillage.** USB Kill et Voice Wipe n'y apparaissent jamais : un
+  téléphone verrouillé ne trahit pas Oblivion et ne souffle pas à un intrus
+  de débrancher. Le revers : si tu branches ton propre téléphone verrouillé,
+  rien ne te prévient. Débranche-le avant la fin du délai.
+- **Pas de diffusion possible sur Google Play.** Depuis Android 14, le pavé
+  du PIN de l'écran de verrouillage ne s'adresse qu'aux services déclarés
+  comme outils d'accessibilité : le Guard doit donc se déclarer comme tel.
+  Google Play réserve cette déclaration aux vraies applications
+  d'accessibilité ; Oblivion est diffusé via F-Droid et en APK direct.
 - **La carte SD externe n'est pas effacée.** `DevicePolicyManager.wipeData()`
   ne factory-reset que le stockage interne. Si ton modèle de menace inclut
   le stockage externe, chiffre-le séparément.
