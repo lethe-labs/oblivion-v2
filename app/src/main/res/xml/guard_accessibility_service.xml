@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--
+  isAccessibilityTool="true" is load-bearing. Since Android 14, the lock-screen
+  PIN pad is marked accessibility-data-sensitive: its events are delivered only
+  to services that declare themselves accessibility tools. Without this flag the
+  Guard receives nothing from the keyguard and every PIN-based trigger (Type A,
+  Type B, Emergency, Decoy) is silently dead. Verified on Android 15.
+  Google Play only accepts this declaration from genuine accessibility apps;
+  Oblivion is distributed outside Play (F-Droid, direct APK).
+
+  notificationTimeout="0": any higher value makes Android coalesce events of the
+  same type, so digits typed less than that many milliseconds apart are dropped
+  and the duress PIN is missed. The service sets the same value in code.
+-->
 <accessibility-service
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeViewTextChanged|typeViewClicked|typeViewLongClicked|typeAnnouncement|typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
     android:accessibilityFlags="flagReportViewIds|flagIncludeNotImportantViews"
     android:canRetrieveWindowContent="true"
+    android:isAccessibilityTool="true"
     android:description="@string/accessibility_service_description"
-    android:notificationTimeout="100"
+    android:notificationTimeout="0"
     android:packageNames="com.android.systemui" />

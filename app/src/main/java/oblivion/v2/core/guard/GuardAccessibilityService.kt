@@ -89,7 +89,9 @@ class GuardAccessibilityService : AccessibilityService() {
             it.flags =
                 AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or
                     AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-            it.notificationTimeout = 100L
+            // Must stay 0: a non-zero timeout coalesces keypad clicks typed
+            // faster than it, and a dropped digit means a missed duress PIN.
+            it.notificationTimeout = 0L
             it.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
             // Scoped to SystemUI: the guard must never see events from the
             // user's other apps. This is a privacy boundary, not an
